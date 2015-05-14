@@ -180,9 +180,10 @@ public class CommandsHandler implements CommandExecutor {
 		else if ("reload".equals(argument) || "znovunacitat".equals(argument) || "r".equals(argument)) {
 			checkPerm(sender, Permissions.Commands.RELOAD);
 
+			ChatControl instance = ChatControl.instance();
 			try {
-				ConfHelper.loadAll();
-				ChatControl.instance().chatCeaser.load();
+				ConfHelper.loadAll();				
+				instance.onReload();
 			} catch (Throwable t) {
 				t.printStackTrace();
 				Common.tell(sender, Localization.RELOAD_FAILED.replace("%error", t.getMessage()));
