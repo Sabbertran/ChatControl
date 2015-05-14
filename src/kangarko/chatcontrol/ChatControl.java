@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import kangarko.chatcontrol.config.ConfHelper;
 import kangarko.chatcontrol.config.ConfHelper.IllegalLocaleException;
@@ -38,6 +39,8 @@ public class ChatControl extends JavaPlugin {
 
 	private static ChatControl instance;
 
+	private BukkitTask timedMessageTask;
+	
 	// Player IP, Time
 	public static HashMap<String, Long> ipLastLogin = new HashMap<>();
 
@@ -111,8 +114,7 @@ public class ChatControl extends JavaPlugin {
 				} else
 					Common.LogInFrame(false, "You need Vault to enable ChatFormatter.");
 
-			if (Settings.Messages.TIMED_ENABLED)
-				scheduleTimedMessages();
+			scheduleTimedMessages();
 
 			getCommand("chatcontrol").setExecutor(new CommandsHandler());
 
@@ -172,8 +174,19 @@ public class ChatControl extends JavaPlugin {
 
 		instance = null;
 	}
+	
+	public void onReload() {
+		if (timedMessageTask != null)
+			timedMessageTask.cancel();
+		
+		scheduleTimedMessages();
+		chatCeaser.load();
+	}
 
 	private void scheduleTimedMessages() {
+		if (!Settings.Messages.TIMED_ENABLED)
+			return;
+		
 		final HashMap<String, Integer> broadcasterIndexes = new HashMap<String, Integer>();
 		final HashMap<String, List<String>> broadcasterCache = new HashMap<>();
 		final Random rand = new Random();
@@ -196,7 +209,7 @@ public class ChatControl extends JavaPlugin {
 					Common.Debug(" - " + msg);
 			}
 
-		new BukkitRunnable() {
+		timedMessageTask = new BukkitRunnable() {
 
 			@Override
 			public void run() {
