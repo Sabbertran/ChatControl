@@ -15,9 +15,7 @@ import kangarko.chatcontrol.config.ConfHelper.ChatMessage;
 import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
 import kangarko.chatcontrol.hooks.RushCoreHook;
-import kangarko.chatcontrol.parser.ProcessingEngine;
 import kangarko.chatcontrol.utils.Common;
-import kangarko.chatcontrol.utils.LagCatcher;
 import kangarko.chatcontrol.utils.Permissions;
 
 public class CommandsHandler implements CommandExecutor {
@@ -26,8 +24,10 @@ public class CommandsHandler implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		try {
 			handleCommand(sender, args);
-		} catch (InsufficientPermissionException ex) {
+		
+		} catch (MissingPermissionException ex) {
 			Common.tell(sender, ex.getMessage());
+		
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -35,7 +35,7 @@ public class CommandsHandler implements CommandExecutor {
 		return true;
 	}
 
-	private void handleCommand(CommandSender sender, String[] args) throws InsufficientPermissionException {
+	private void handleCommand(CommandSender sender, String[] args) {
 		if (args.length == 0) {
 			Common.tell(sender,
 					"&8-----------------------------------------------------|",
@@ -46,7 +46,7 @@ public class CommandsHandler implements CommandExecutor {
 		}
 
 		String argument = args[0].toLowerCase();
-		String param = args.length > 1 && args[1].startsWith("-") ? args[1] : "";
+		String param = (args.length > 1 && args[1].startsWith("-") ? args[1] : "").toLowerCase();
 		String reason = "";
 
 		for (int i = param.isEmpty() ? 1 : 2; i < args.length; i++)
@@ -60,9 +60,9 @@ public class CommandsHandler implements CommandExecutor {
 
 			if (param.isEmpty())
 				Common.broadcastIfEnabled(Settings.Mute.BROADCAST, sender, ChatControl.muted ? Localization.MUTE_UNMUTE_BROADCAST : Localization.MUTE_BROADCAST, reason);
-			else if ((param.equalsIgnoreCase("-silent") || param.equalsIgnoreCase("-s")) && Common.hasPerm(sender, Permissions.Commands.MUTE_SILENT)) {
+			else if ((param.equals("-silent") || param.equals("-s")) && Common.hasPerm(sender, Permissions.Commands.MUTE_SILENT)) {
 				// do nothing
-			} else if ((param.equalsIgnoreCase("-anonymous") || param.equalsIgnoreCase("-a")) && Common.hasPerm(sender, Permissions.Commands.MUTE_ANONYMOUS))
+			} else if ((param.equals("-anonymous") || param.equals("-a")) && Common.hasPerm(sender, Permissions.Commands.MUTE_ANONYMOUS))
 				Common.broadcastIfEnabled(Settings.Mute.BROADCAST, sender, ChatControl.muted ? Localization.MUTE_ANON_UNMUTE_BROADCAST : Localization.MUTE_ANON_BROADCAST, reason);
 			else if (param.startsWith("-")) {
 				Common.tell(sender, Localization.WRONG_PARAMETERS);
@@ -79,7 +79,7 @@ public class CommandsHandler implements CommandExecutor {
 		else if ("clear".equals(argument) || "c".equals(argument)) {
 			checkPerm(sender, Permissions.Commands.CLEAR);
 
-			if ((param.equalsIgnoreCase("-console") || param.equalsIgnoreCase("-c") || param.equalsIgnoreCase("-konzola"))
+			if ((param.equals("-console") || param.equals("-c"))
 					&& Common.hasPerm(sender, Permissions.Commands.CLEAR_CONSOLE)) {
 				for (int i = 0; i < Settings.Clear.CONSOLE_LINES; i++)
 					System.out.println("           ");
@@ -101,9 +101,9 @@ public class CommandsHandler implements CommandExecutor {
 						Common.broadcastIfEnabled(Settings.Clear.BROADCAST, Sender, Localization.CLEAR_BROADCAST, Reason);
 					}
 				}.runTaskLater(ChatControl.instance(), 2);
-			} else if ((param.equalsIgnoreCase("-silent") || param.equalsIgnoreCase("-s")) && Common.hasPerm(sender, Permissions.Commands.CLEAR_SILENT)) {
+			} else if ((param.equals("-silent") || param.equals("-s")) && Common.hasPerm(sender, Permissions.Commands.CLEAR_SILENT)) {
 				// broadcast nothing
-			} else if ((param.equalsIgnoreCase("-anonymous") || param.equalsIgnoreCase("-a")) && Common.hasPerm(sender, Permissions.Commands.CLEAR_ANONYMOUS)) {
+			} else if ((param.equals("-anonymous") || param.equals("-a")) && Common.hasPerm(sender, Permissions.Commands.CLEAR_ANONYMOUS)) {
 				new BukkitRunnable() {
 					@Override
 					public void run() {
@@ -136,10 +136,10 @@ public class CommandsHandler implements CommandExecutor {
 				return;
 			}
 
-			param = args[1];
+			param = args[1].toLowerCase();
 			String fakePlayer = args.length == 3 ? Common.colorize(args[2]) : sender.getName();
 
-			if (param.equalsIgnoreCase("join") || param.equalsIgnoreCase("j")) {
+			if (param.equals("join") || param.equals("j")) {
 				if (Settings.Messages.JOIN.getType() == ChatMessage.Type.DEFAULT)
 					Common.broadcast(ChatColor.YELLOW + fakePlayer + ChatColor.YELLOW + " joined the game.");
 
@@ -149,7 +149,7 @@ public class CommandsHandler implements CommandExecutor {
 				else
 					Common.broadcastWithPlayer(Settings.Messages.JOIN.getMessage(), fakePlayer);
 
-			} else if (param.equalsIgnoreCase("quit") || param.equalsIgnoreCase("q") || param.equalsIgnoreCase("leave") || param.equalsIgnoreCase("l")) {
+			} else if (param.equals("quit") || param.equals("q")) {
 				if (Settings.Messages.QUIT.getType() == ChatMessage.Type.DEFAULT)
 					Common.broadcast(ChatColor.YELLOW + fakePlayer + ChatColor.YELLOW + " left the game.");
 
@@ -159,7 +159,7 @@ public class CommandsHandler implements CommandExecutor {
 				else
 					Common.broadcastWithPlayer(Settings.Messages.QUIT.getMessage(), fakePlayer);
 
-			} else if (param.equalsIgnoreCase("kick") || param.equalsIgnoreCase("k")) {
+			} else if (param.equals("kick") || param.equals("k")) {
 				if (Settings.Messages.KICK.getType() == ChatMessage.Type.DEFAULT)
 					Common.broadcast(ChatColor.YELLOW + fakePlayer + ChatColor.YELLOW + " left the game.");
 
@@ -209,7 +209,7 @@ public class CommandsHandler implements CommandExecutor {
 					"  &f/chc fake &6<join/leave> &2[name] &e- Fake join/quit messages.",
 					"  &f/chc reload &e- Reload configuration.",
 					"  &f/chc list &e- Command list.");
-		} 
+		/*} 
 
 		else if ("test".equals(argument)) {
 			if (args.length == 1) {
@@ -229,22 +229,22 @@ public class CommandsHandler implements CommandExecutor {
 					ex.printStackTrace();
 					Common.tell(sender, ChatColor.RED + ex.getClass().getSimpleName() + ": " + ex.getMessage());
 				}
-			}
+			}*/
 
 		} else
 			Common.tell(sender, Localization.WRONG_ARGUMENTS);
 	}
 
-	private void checkPerm(CommandSender sender, String perm) throws InsufficientPermissionException {
+	private void checkPerm(CommandSender sender, String perm) {
 		if (sender instanceof Player && !Common.hasPerm(sender, perm))
-			throw new InsufficientPermissionException(perm);
+			throw new MissingPermissionException(perm);
 	}
 }
 
-class InsufficientPermissionException extends Exception {
+class MissingPermissionException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
-	public InsufficientPermissionException(String perm) {
+	public MissingPermissionException(String perm) {
 		super(Localization.NO_PERMISSION.replace("%perm", perm));
 	}
 }

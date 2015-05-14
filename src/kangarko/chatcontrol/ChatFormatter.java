@@ -271,7 +271,7 @@ public class ChatFormatter implements Listener {
 	private String getClanTag(Player pl) {
 		if (clansHook == null)
 			return "";
-
+		
 		return clansHook.getClanTag(pl);
 	}
 }

@@ -51,12 +51,12 @@ public class Rule {
 	/**
 	 * Replace the part of the checked message that matches {@link #match} with one of the string (randomly chosen)
 	 */
-	private String[] replacement;
+	private String[] replacements;
 
 	/**
 	 * Rewrite the entire message to specified string chosen randomly
 	 */
-	private String[] rewrite;
+	private String[] rewrites;
 
 	/**
 	 * Optional commands executed as the server console divided by |
@@ -181,23 +181,23 @@ public class Rule {
 	}
 
 	public String[] getReplacements() {
-		return replacement;
+		return replacements;
 	}
 
 	public void parseReplacements(String line) {
-		Validate.isTrue(this.replacement == null, "Replacement already set on: " + this);
+		Validate.isTrue(this.replacements == null, "Replacement already set on: " + this);
 
-		this.replacement = line.split("\\|");
+		this.replacements = line.split("\\|");
 	}
 
 	public String[] getRewrites() {
-		return rewrite;
+		return rewrites;
 	}
 
 	public void parseRewrites(String line) {
-		Validate.isTrue(this.rewrite == null, "Rewrite message already set on: " + this);
+		Validate.isTrue(this.rewrites == null, "Rewrite message already set on: " + this);
 
-		this.rewrite = line.split("\\|");
+		this.rewrites = line.split("\\|");
 	}
 
 	public String[] getCommandsToExecute() {
@@ -307,8 +307,8 @@ public class Rule {
 				+ (bypassPerm != null ? "    Bypass With Perm = \'" + bypassPerm + "\',\n" : "")
 				+ (ignoredMessage != null ? "    Ignore Message = \'" + ignoredMessage + "\',\n" : "")
 				+ (ignoredEvent != null ? "    Ignore Event = \'" + ignoredEvent + "\',\n" : "")
-				+ (replacement != null ? "    Replace With = \'" + StringUtils.join(replacement, ",") + "\',\n" : "")
-				+ (rewrite != null ? "    Rewrite = \'" + rewrite + "\',\n" : "")
+				+ (replacements != null ? "    Replace With = \'" + StringUtils.join(replacements, ",") + "\',\n" : "")
+				+ (rewrites != null ? "    Rewrite = \'" + rewrites + "\',\n" : "")
 				+ (commandToExecute != null ? "    Execute Command = \'" + StringUtils.join(commandToExecute, ",") + "\',\n" : "")
 				+ (handler != null ? "    Handler = \'" + handler + "\',\n" : "")
 				+ (warnMessage != null ? "    Warn Message = \'" + warnMessage + "\',\n" : "")
