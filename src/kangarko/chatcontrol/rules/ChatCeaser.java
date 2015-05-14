@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -277,10 +278,10 @@ public final class ChatCeaser {
 				if (e.isCancelled())
 					return msg; // The message will not appear in the chat, no need to continue.
 
-				if (rule.getRewrites() != null)
+				if (rule.getRewrites() != null && rule.getRewrites().length > 0)
 					msg = getRandomString(pl, rule, rule.getRewrites());
 
-				if (rule.getReplacements() != null)
+				if (rule.getReplacements() != null && rule.getReplacements().length > 0)
 					msg = msg.replaceAll("(?i)" + rule.getMatch(), getRandomString(pl, rule, rule.getReplacements()));
 
 				if (rule.getCommandsToExecute() != null)
@@ -512,6 +513,8 @@ public final class ChatCeaser {
 	 * @return a colorized string with replaced variables randoly choosen from strings
 	 */
 	private String getRandomString(Player player, Rule rule, String[] messages) {
+		Validate.isTrue(messages.length > 0, "Got empty message '" + StringUtils.join(messages) + "'");
+		
 		String randomMsg = messages[rand.nextInt(messages.length)];
 		return Common.colorize(replaceVariables(player, rule, randomMsg));
 	}
