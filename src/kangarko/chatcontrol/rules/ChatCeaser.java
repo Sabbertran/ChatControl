@@ -26,6 +26,7 @@ import org.json.simple.JSONObject;
 import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.config.Settings;
 import kangarko.chatcontrol.utils.Common;
+import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.LagCatcher;
 import kangarko.chatcontrol.utils.Writer;
 
@@ -267,7 +268,7 @@ public final class ChatCeaser {
 				if (rule.getCustomNotifyMessage() != null) {
 					Objects.requireNonNull(rule.getCustomNotifyPermission(), "Custom alert permission cannot be null!");
 
-					for (Player online : Bukkit.getOnlinePlayers())
+					for (Player online : CompatProvider.getAllPlayers())
 						if (Common.hasPerm(online, rule.getCustomNotifyPermission()))
 							Common.tellLater(online, 1, replaceVariables(pl, rule, rule.getCustomNotifyMessage()).replace("%player", pl.getName()).replace("%message", msg));
 				}
@@ -358,7 +359,7 @@ public final class ChatCeaser {
 		if (handler.getStaffAlertMsg() != null) {
 			Objects.requireNonNull(handler.getStaffAlertPermission(), "Staff alert permission is null for: " + this);
 
-			for (Player online : Bukkit.getOnlinePlayers())
+			for (Player online : CompatProvider.getAllPlayers())
 				if (Common.hasPerm(online, handler.getStaffAlertPermission()))
 					Common.tell(online, (flag == Rule.SIGN ? "[SIGN at " + Common.shortLocation(pl.getLocation()) + "] " : "") + replaceVariables(pl, handler, handler.getStaffAlertMsg()).replace("%message", msg), pl.getName());
 		}

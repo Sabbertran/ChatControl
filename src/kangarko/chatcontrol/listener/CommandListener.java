@@ -12,6 +12,7 @@ import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
 import kangarko.chatcontrol.hooks.RushCoreHook;
 import kangarko.chatcontrol.utils.Common;
+import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.LagCatcher;
 import kangarko.chatcontrol.utils.Permissions;
 import kangarko.chatcontrol.utils.Writer;
@@ -21,7 +22,7 @@ public class CommandListener implements Listener {
 	@SuppressWarnings("deprecation")
 	@EventHandler(ignoreCancelled = true)
 	public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
-		if (Bukkit.getOnlinePlayers().size() < Settings.MIN_PLAYERS_TO_ENABLE)
+		if (CompatProvider.getAllPlayers().size() < Settings.MIN_PLAYERS_TO_ENABLE)
 			return;
 
 		LagCatcher.start("Command event");

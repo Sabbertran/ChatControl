@@ -20,6 +20,7 @@ import kangarko.chatcontrol.hooks.MultiverseHook;
 import kangarko.chatcontrol.hooks.SimpleClansHook;
 import kangarko.chatcontrol.hooks.TownyHook;
 import kangarko.chatcontrol.utils.Common;
+import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.Permissions;
 import kangarko.chatcontrol.utils.Writer;
 
@@ -130,7 +131,7 @@ public class ChatFormatter implements Listener {
 			Location playerLocation = sender.getLocation();
 			double squaredDistance = Math.pow(range, 2.0D);
 
-			for (Player receiver : Bukkit.getOnlinePlayers()) {
+			for (Player receiver : CompatProvider.getAllPlayers()) {
 				if (receiver.getWorld().getName().equals(sender.getWorld().getName()))
 					if (Common.hasPerm(sender, Permissions.Formatter.OVERRIDE_RANGED_WORLD) || playerLocation.distanceSquared(receiver.getLocation()) <= squaredDistance) {
 						recipients.add(receiver);
@@ -147,7 +148,7 @@ public class ChatFormatter implements Listener {
 			Writer.Write(Writer.ERROR_FILE_PATH, "Range Chat", sender.getName() + ": \'" + message + "\' Resulted in error: " + ex.getMessage());
 
 			if (Common.hasPerm(sender, Permissions.Formatter.OVERRIDE_RANGED_WORLD)) {
-				for (Player recipient : Bukkit.getOnlinePlayers())
+				for (Player recipient : CompatProvider.getAllPlayers())
 					if (recipient.getWorld().equals(sender.getWorld()))
 						recipients.add(recipient);
 

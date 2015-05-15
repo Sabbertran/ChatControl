@@ -31,6 +31,8 @@ import kangarko.chatcontrol.listener.CommandListener;
 import kangarko.chatcontrol.listener.PlayerListener;
 import kangarko.chatcontrol.rules.ChatCeaser;
 import kangarko.chatcontrol.utils.Common;
+import kangarko.chatcontrol.utils.CompatProvider;
+import kangarko.chatcontrol.utils.CompatProvider.UnsupportedServerException;
 import kangarko.chatcontrol.utils.LagCatcher;
 import kangarko.chatcontrol.utils.Permissions;
 import kangarko.chatcontrol.utils.UpdateCheck;
@@ -40,7 +42,7 @@ public class ChatControl extends JavaPlugin {
 	private static ChatControl instance;
 
 	private BukkitTask timedMessageTask;
-	
+
 	// Player IP, Time
 	public static HashMap<String, Long> ipLastLogin = new HashMap<>();
 
@@ -60,13 +62,13 @@ public class ChatControl extends JavaPlugin {
 		try {			
 			instance = this;
 
+			for (Player pl : CompatProvider.getAllPlayers())
+				getDataFor(pl);
+
 			ConfHelper.loadAll();
 
 			chatCeaser = new ChatCeaser();
 			chatCeaser.load();
-
-			for (Player pl : getServer().getOnlinePlayers())
-				getDataFor(pl);
 
 			if (doesPluginExist("Essentials"))
 				ess = new EssentialsHook();
@@ -76,7 +78,7 @@ public class ChatControl extends JavaPlugin {
 
 			if (doesPluginExist("AuthMe"))
 				authMe = new AuthMeHook();
-			
+
 			if (doesPluginExist("RushCore"))
 				RushCoreHook.zapnute = true;
 
@@ -122,7 +124,7 @@ public class ChatControl extends JavaPlugin {
 				getServer().getScheduler().runTaskAsynchronously(this, new UpdateCheck("https://raw.github.com/kangarko/ChatControl/master/plugin.yml"));
 
 			Common.addLoggingPrefix();
-			
+
 			if (Settings.DEBUG)
 				Common.Log("Debug was enabled, ready for console spam :P");
 
@@ -131,7 +133,7 @@ public class ChatControl extends JavaPlugin {
 
 			Common.Log("&4!----------------------------------------------!");
 			Common.Log(" &cError loading ChatControl, plugin is disabled!");
-			Common.Log(" &cRunning on " + getServer().getVersion() + " (" + Common.getServerVersion() + ") and Java " + System.getProperty("java.version"));
+			Common.Log(" &cRunning on " + getServer().getBukkitVersion() + " (" + Common.getServerVersion() + ") and Java " + System.getProperty("java.version"));
 			Common.Log("&4!----------------------------------------------!");
 
 			if (t instanceof InvalidConfigurationException) {
@@ -142,7 +144,16 @@ public class ChatControl extends JavaPlugin {
 
 			} else if (t instanceof IllegalLocaleException)
 				Common.Log(" &cChatControl doesn't have the locale: " + Settings.LOCALIZATION_SUFFIX);
-			
+
+			else if (t.getCause() != null && t.getCause() instanceof UnsupportedServerException) {
+				if (getServer().getBukkitVersion().startsWith("1.2.5"))
+					Common.Log(" &cSorry but Minecraft 1.2.5 is no longer supported!");
+				else {
+					Common.Log(" &cUnable to determine server version!");
+					Common.Log(" &cYour server is either too old or");
+					Common.Log(" &cthe plugin broke on the new version :(");
+				}
+			}			
 			else if (t instanceof InBuiltFileMissingException) {
 				Common.Log(" &c" + t.getMessage());
 				Common.Log(" &cTo fix it, create a blank file with");
@@ -174,11 +185,11 @@ public class ChatControl extends JavaPlugin {
 
 		instance = null;
 	}
-	
+
 	public void onReload() {
 		if (timedMessageTask != null)
 			timedMessageTask.cancel();
-		
+
 		scheduleTimedMessages();
 		chatCeaser.load();
 	}
@@ -186,7 +197,7 @@ public class ChatControl extends JavaPlugin {
 	private void scheduleTimedMessages() {
 		if (!Settings.Messages.TIMED_ENABLED)
 			return;
-		
+
 		final HashMap<String, Integer> broadcasterIndexes = new HashMap<String, Integer>();
 		final HashMap<String, List<String>> broadcasterCache = new HashMap<>();
 		final Random rand = new Random();
@@ -214,10 +225,10 @@ public class ChatControl extends JavaPlugin {
 			@Override
 			public void run() {
 				LagCatcher.start("timed messages");
-				
+
 				for (String world : timed.keySet()) {
 					List<String> msgs = timed.get(world); // messages in world					
-					
+
 					if (msgs.size() == 0) // no messages there, pass through
 						continue;
 
@@ -250,14 +261,14 @@ public class ChatControl extends JavaPlugin {
 					else {
 						String prefix = Settings.Messages.TIMED_PREFIX;
 						String suffix = Settings.Messages.TIMED_SUFFIX;
-							
+
 						msg = (!prefix.isEmpty() ? prefix + " " : "") + msg + (!suffix.isEmpty() ? " " + suffix : "");
 					}
-						
+
 					Common.Debug(msg);
-					
+
 					if (world.equalsIgnoreCase("global")) {
-						for (Player online : getServer().getOnlinePlayers())
+						for (Player online : CompatProvider.getAllPlayers())
 							if (!timed.keySet().contains(online.getWorld().getName()) && Common.hasPerm(online, Permissions.VIEW_TIMED_MESSAGES) && RushCoreHook.moznoZobrazitSpravu(online.getName()))
 								Common.tell(online, msg.replace("%world", online.getWorld().getName()));
 
@@ -272,7 +283,7 @@ public class ChatControl extends JavaPlugin {
 									Common.tell(online, msg.replace("%world", world));
 					}
 				}
-				
+
 				LagCatcher.end("timed messages");
 			}
 		}.runTaskTimer(this, 20, 20 * Settings.Messages.TIMED_DELAY_SECONDS);

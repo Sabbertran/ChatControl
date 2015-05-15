@@ -16,6 +16,7 @@ import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
 import kangarko.chatcontrol.hooks.RushCoreHook;
 import kangarko.chatcontrol.utils.Common;
+import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.Permissions;
 
 public class CommandsHandler implements CommandExecutor {
@@ -115,7 +116,7 @@ public class CommandsHandler implements CommandExecutor {
 				return;
 			}
 
-			for (Player pl : Bukkit.getOnlinePlayers()) {
+			for (Player pl : CompatProvider.getAllPlayers()) {
 				if (Settings.Clear.IGNORE_STAFF && Common.hasPerm(pl, Permissions.Bypasses.CHAT_CLEARING)) {
 					Common.tell(pl, Localization.CLEAR_STAFF, sender.getName());
 					continue;
