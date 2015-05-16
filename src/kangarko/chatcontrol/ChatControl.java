@@ -61,7 +61,6 @@ public class ChatControl extends JavaPlugin {
 			for (Player pl : CompatProvider.getAllPlayers())
 				getDataFor(pl);
 
-			setupDependencies();
 			ConfHelper.loadAll();
 
 			chatCeaser = new ChatCeaser();
@@ -270,18 +269,6 @@ public class ChatControl extends JavaPlugin {
 				LagCatcher.end("timed messages");
 			}
 		}.runTaskTimer(this, 20, 20 * Settings.Messages.TIMED_DELAY_SECONDS);
-	}
-
-	private void setupDependencies() {
-		// Unable to find a nicer solution.
-		if (AuthMeHook.HOOKED);
-		if (EssentialsHook.HOOKED);
-		if (ProtocolLibHook.HOOKED);
-		if (MultiverseHook.HOOKED);
-		if (RushCoreHook.HOOKED);
-		if (SimpleClansHook.HOOKED);
-		if (TownyHook.HOOKED);
-		if (VaultHook.HOOKED);
 	}
 
 	// ------------------------ static ------------------------

@@ -19,14 +19,12 @@ import kangarko.chatcontrol.utils.Permissions;
 
 public class ProtocolLibHook {
 
-	public static final boolean HOOKED;
-	
-	private static final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
-	private static final JSONParser parser = new JSONParser();
+	private final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+	private final JSONParser parser = new JSONParser();
 
-	public static void init() {
-		
-		if (Settings.Packets.TabComplete.DISABLE) {
+	public void initListening() {
+
+		if (Settings.Packets.TabComplete.DISABLE)
 			manager.addPacketListener(new PacketAdapter(ChatControl.instance(), PacketType.Play.Client.TAB_COMPLETE) {
 
 				@Override
@@ -47,9 +45,7 @@ public class ProtocolLibHook {
 				}
 			});
 
-		}
-
-		if (Settings.Rules.CHECK_PACKETS) {
+		if (Settings.Rules.CHECK_PACKETS)
 			manager.addPacketListener(new PacketAdapter(ChatControl.instance(), PacketType.Play.Server.CHAT) {
 
 				@Override
@@ -88,10 +84,5 @@ public class ProtocolLibHook {
 						chat.write(0, WrappedChatComponent.fromJson(json.toJSONString()));
 				}
 			});
-		}
-	}
-	
-	static {
-		HOOKED = Common.doesPluginExist("ProtocolLib");		
 	}
 }
