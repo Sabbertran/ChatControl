@@ -24,20 +24,30 @@ import kangarko.chatcontrol.config.Settings;
 public class Common {
 
 	private static final ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-	private static final DecimalFormat format = new DecimalFormat("#.###");
+	
+	private static final DecimalFormat digitsFormat = new DecimalFormat("#.###");
+	private static final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+	
+	private Common() {
+	}
+	
 	private static String INTERNAL_PREFIX = "";
-
 	public static void addLoggingPrefix() {
 		INTERNAL_PREFIX = "[ChatControl] ";
 	}
-
-	private static final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
 	/**
 	 * DAY.MONTH.YEAR HOUR:MINUTES:SECONDS
 	 */
 	public static String getFormattedDate() {
 		return dateFormat.format(System.currentTimeMillis());
+	}
+	
+	/**
+	 * #.###
+	 */
+	public static String threeDigits(double value) {
+		return digitsFormat.format(value);
 	}
 
 	/**
@@ -142,12 +152,23 @@ public class Common {
 	}
 
 	public static String colorize(String str) {
+		if (str == null || str.isEmpty())
+			return "";
+		
 		return ChatColor.translateAlternateColorCodes('&', setPrefix(str));
 	}
 
 	public static String consoleLine() {
 		return "&6*----------------------------------------------*";
-	}	
+	}
+	
+	public static boolean doesPluginExist(String plugin) {
+		boolean hooked = Bukkit.getPluginManager().getPlugin(plugin) != null;
+		if (hooked)
+			Common.Log("&3Hooked into&8: &f" + plugin);
+		
+		return hooked;
+	}
 
 	// ---------------------------- PRIVATE --------------------------------------
 
@@ -314,8 +335,6 @@ public class Common {
 		Pattern pattern = null;
 		TimedCharSequence timedMsg = new TimedCharSequence(plain_msg.toLowerCase(), Settings.REGEX_TIMEOUT);
 
-		//Debug("Checking " + timedMsg + " against " + regex);
-
 		try {
 			pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 		} catch (PatternSyntaxException ex) {
@@ -329,7 +348,7 @@ public class Common {
 		try {
 			return matcher.find();
 		} catch (RuntimeException ex) {
-			Writer.Write(Writer.ERROR_FILE_PATH, null, "Regex check timed out (bad regex?) (plugin ver. " + ChatControl.instance().getDescription().getVersion() + ")! \nString checked: " + timedMsg + "\nRegex: " + regex + "");
+			Writer.Write(Writer.ERROR_PATH, null, "Regex check timed out (bad regex?) (plugin ver. " + ChatControl.instance().getDescription().getVersion() + ")! \nString checked: " + timedMsg + "\nRegex: " + regex + "");
 			Thread.dumpStack();
 			LogInFrame(false, "Regex timed out after " + Settings.REGEX_TIMEOUT + "ms! ", "&fREG EX&c: &7" + regex, "&fSTRING&c: &7" + plain_msg);
 			return false;
@@ -371,9 +390,5 @@ public class Common {
 
 	public static String lastColor(String msg) {
 		return msg.substring(msg.lastIndexOf('&'), msg.length());
-	}
-	
-	public static String threeDigits(double value) {
-		return format.format(value);
 	}
 }

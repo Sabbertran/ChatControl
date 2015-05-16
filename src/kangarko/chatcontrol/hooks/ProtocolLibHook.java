@@ -1,7 +1,5 @@
 package kangarko.chatcontrol.hooks;
 
-import java.io.File;
-
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -21,16 +19,14 @@ import kangarko.chatcontrol.utils.Permissions;
 
 public class ProtocolLibHook {
 
+	public static final boolean HOOKED;
+	
 	private static final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 	private static final JSONParser parser = new JSONParser();
 
 	public static void init() {
 		
 		if (Settings.Packets.TabComplete.DISABLE) {
-		
-			if (new File("spigot.yml").exists())
-				Common.Log("&aDetected spigot (or similar), it is recommended to use its inbuilt tab-complete instead.");
-
 			manager.addPacketListener(new PacketAdapter(ChatControl.instance(), PacketType.Play.Client.TAB_COMPLETE) {
 
 				@Override
@@ -93,5 +89,9 @@ public class ProtocolLibHook {
 				}
 			});
 		}
+	}
+	
+	static {
+		HOOKED = Common.doesPluginExist("ProtocolLib");		
 	}
 }

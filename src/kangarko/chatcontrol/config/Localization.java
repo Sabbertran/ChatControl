@@ -13,6 +13,9 @@ import kangarko.chatcontrol.ChatControl;
 @SuppressWarnings("unused")
 public class Localization extends ConfHelper {
 
+	private Localization() {
+	}
+	
 	@SuppressWarnings("deprecation")
 	protected static void load() throws Exception {
 		// try if the user has his modified version of localization inside the plugin folder
@@ -113,7 +116,7 @@ public class Localization extends ConfHelper {
 		CANNOT_CHAT_UNTIL_MOVED = getString("Chat_Until_Moved", "&7You cannot chat until you move!"); // TODO radius?
 
 		pathPrefix("Anti_Bot");
-		ANTIBOT_REJOIN_WAIT_MESSAGE = getString("Rejoin_Message", "%prefix\\n\\n&6Please wait &7%time second(s)&6 before logging in again.");
+		ANTIBOT_REJOIN_WAIT_MESSAGE = getString("Rejoin_Message", "%prefix\\n\\n&6Please wait &7%time %seconds&6 before logging in again.");
 
 		pathPrefix("Anti_Spam");
 		ANTISPAM_SIMILAR_MESSAGE = getString("Similar_Message", "&cPlease do not repeat the same (or similar) message.");

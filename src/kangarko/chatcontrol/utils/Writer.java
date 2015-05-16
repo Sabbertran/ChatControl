@@ -14,10 +14,13 @@ import kangarko.chatcontrol.config.Settings;
 
 public class Writer {
 
-	public static final String ERROR_FILE_PATH = "errors/errors.txt";
-	public static final String CHAT_FILE_PATH = "logs/chat.txt";
-	public static final String RULES_FILE_PATH = "logs/rules.txt";
+	public static final String ERROR_PATH = "errors/errors.txt";
+	public static final String CHAT_PATH = "logs/chat.txt";
+	public static final String RULES_PATH = "logs/rules.txt";
 
+	private Writer() {
+	}
+	
 	/**
 	 * Write a line to file with optional prefix which can be null.
 	 * @param to path to the file inside the plugin folder

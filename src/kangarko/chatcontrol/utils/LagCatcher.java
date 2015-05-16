@@ -12,6 +12,9 @@ public class LagCatcher {
 
 	public static HashMap<String, Long> lagMap = new HashMap<>();
 
+	private LagCatcher() {
+	}
+	
 	public static void start(String section) {
 		if (Settings.CATCH_LAG == 0)
 			return;

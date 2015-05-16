@@ -1,7 +1,6 @@
 package kangarko.chatcontrol.listener;
 
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +10,7 @@ import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.PlayerCache;
 import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
+import kangarko.chatcontrol.hooks.EssentialsHook;
 import kangarko.chatcontrol.hooks.RushCoreHook;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
@@ -127,9 +127,9 @@ public class ChatListener implements Listener {
 			e.setMessage(message);
 
 		if (Settings.Writer.ENABLED && !Settings.Writer.WHITELIST_PLAYERS.contains(pl.getName().toLowerCase()))
-			Writer.Write(Writer.CHAT_FILE_PATH, pl.getName(), message);
+			Writer.Write(Writer.CHAT_PATH, pl.getName(), message);
 
-		if (Settings.SoundNotify.ENABLED && !RushCoreHook.zapnute)
+		if (Settings.SoundNotify.ENABLED && !RushCoreHook.HOOKED)
 			if (Settings.SoundNotify.CHAT_PREFIX.equalsIgnoreCase("none")) {
 				for (Player online : CompatProvider.getAllPlayers())
 					if (message.toLowerCase().contains(online.getName().toLowerCase()) && canSoundNotify(online.getName()) && Common.hasPerm(online, Permissions.Notify.WHEN_MENTIONED))
@@ -143,9 +143,9 @@ public class ChatListener implements Listener {
 	}
 
 	public boolean canSoundNotify(String pl) {
-		if (!Settings.SoundNotify.ONLY_WHEN_AFK || ChatControl.instance().ess == null)
+		if (!Settings.SoundNotify.ONLY_WHEN_AFK)
 			return true;
 
-		return ChatControl.instance().ess.isAfk(pl);
+		return EssentialsHook.isAfk(pl);
 	}
 }

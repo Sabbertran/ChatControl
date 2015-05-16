@@ -11,6 +11,9 @@ import kangarko.chatcontrol.utils.Common;
 @SuppressWarnings("unused")
 public class Settings extends ConfHelper {
 
+	private Settings() {
+	}
+	
 	protected static void load() throws Exception {
 		createFileAndLoad("settings.yml", Settings.class);
 	}

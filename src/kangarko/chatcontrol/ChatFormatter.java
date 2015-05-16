@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -16,9 +15,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import kangarko.chatcontrol.config.Settings;
+import kangarko.chatcontrol.hooks.AuthMeHook;
 import kangarko.chatcontrol.hooks.MultiverseHook;
 import kangarko.chatcontrol.hooks.SimpleClansHook;
 import kangarko.chatcontrol.hooks.TownyHook;
+import kangarko.chatcontrol.hooks.VaultHook;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.Permissions;
@@ -33,21 +34,6 @@ public class ChatFormatter implements Listener {
 	private final Pattern UNDERLINE_REGEX = Pattern.compile("(?i)&([N])");
 	private final Pattern ITALIC_REGEX = Pattern.compile("(?i)&([O])");
 	private final Pattern RESET_REGEX = Pattern.compile("(?i)&([R])");
-
-	private MultiverseHook mvHook;
-	private SimpleClansHook clansHook;
-	private TownyHook townyHook;
-
-	public ChatFormatter() {
-		if (doesPluginExist("Multiverse-Core", "World Alias"))
-			mvHook = new MultiverseHook();
-
-		if (doesPluginExist("SimpleClans"))
-			clansHook = new SimpleClansHook();
-
-		if (doesPluginExist("Towny", "Tested on v0.8x"))
-			townyHook = new TownyHook();
-	}
 
 	@EventHandler(ignoreCancelled = true)
 	public void onChatFormat(AsyncPlayerChatEvent e) {
@@ -110,56 +96,19 @@ public class ChatFormatter implements Listener {
 
 	public String replacePlayerVariables(Player pl, String format) {
 		String world = pl.getWorld().getName();
-
-		if (ChatControl.instance().authMe != null)
-			format = format.replace("%countrycode", ChatControl.instance().authMe.getCountryCode(pl)).replace("%countryname", ChatControl.instance().authMe.getCountryName(pl));
+		
+		format = format.replace("%countrycode", AuthMeHook.getCountryCode(pl))
+					   .replace("%countryname", AuthMeHook.getCountryName(pl));
 
 		return format
-				.replace("%pl_prefix", formatColor(ChatControl.instance().vault.getPlayerPrefix(pl)))
-				.replace("%pl_suffix", formatColor(ChatControl.instance().vault.getPlayerSuffix(pl)))
-				.replace("%world", getWorldAlias(world))
+				.replace("%pl_prefix", formatColor(VaultHook.getPlayerPrefix(pl)))
+				.replace("%pl_suffix", formatColor(VaultHook.getPlayerSuffix(pl)))
+				.replace("%world", MultiverseHook.getWorldAlias(world))
 				.replace("%health", formatHealth(pl) + ChatColor.RESET)
 				.replace("%player", pl.getName())
-				.replace("%town", getTown(pl))
-				.replace("%nation", getNation(pl))
-				.replace("%clan", getClanTag(pl));
-	}
-
-	private List<Player> getLocalRecipients(Player sender, String message, double range) {
-		List<Player> recipients = new LinkedList<Player>();
-		try {
-			Location playerLocation = sender.getLocation();
-			double squaredDistance = Math.pow(range, 2.0D);
-
-			for (Player receiver : CompatProvider.getAllPlayers()) {
-				if (receiver.getWorld().getName().equals(sender.getWorld().getName()))
-					if (Common.hasPerm(sender, Permissions.Formatter.OVERRIDE_RANGED_WORLD) || playerLocation.distanceSquared(receiver.getLocation()) <= squaredDistance) {
-						recipients.add(receiver);
-						continue;
-					}
-				
-				if (Common.hasPerm(receiver, Permissions.Formatter.SPY))
-					Common.tell(receiver, replaceAllVariables(sender, Settings.Chat.Formatter.SPY_FORMAT.replace("%message", message).replace("%displayname", sender.getDisplayName())));
-			}
-
-			return recipients;
-		} catch (ArrayIndexOutOfBoundsException ex) {
-			Common.Log("(Range Chat) Got " + ex.getMessage() + ", trying (limited) backup.");
-			Writer.Write(Writer.ERROR_FILE_PATH, "Range Chat", sender.getName() + ": \'" + message + "\' Resulted in error: " + ex.getMessage());
-
-			if (Common.hasPerm(sender, Permissions.Formatter.OVERRIDE_RANGED_WORLD)) {
-				for (Player recipient : CompatProvider.getAllPlayers())
-					if (recipient.getWorld().equals(sender.getWorld()))
-						recipients.add(recipient);
-
-			} else {
-				for (Entity en : sender.getNearbyEntities(range, range, range))
-					if (en.getType() == EntityType.PLAYER)
-						recipients.add((Player) en);
-			}
-		}
-
-		return recipients;
+				.replace("%town", TownyHook.getTownName(pl))
+				.replace("%nation", TownyHook.getNation(pl))
+				.replace("%clan", SimpleClansHook.getClanTag(pl));
 	}
 
 	private String replaceTime(String msg) {
@@ -193,9 +142,6 @@ public class ChatFormatter implements Listener {
 	}
 
 	private String formatColor(String string) {
-		if (string == null)
-			return "";
-
 		return Common.colorize(string);
 	}
 
@@ -236,44 +182,41 @@ public class ChatFormatter implements Listener {
 		return ChatColor.RED + "" + health;
 	}
 
-	private boolean doesPluginExist(String plugin) {
-		return doesPluginExist(plugin, null);
-	}
+	private List<Player> getLocalRecipients(Player sender, String message, double range) {
+		List<Player> recipients = new LinkedList<Player>();
+		try {
+			Location playerLocation = sender.getLocation();
+			double squaredDistance = Math.pow(range, 2.0D);
 
-	private boolean doesPluginExist(String plugin, String message) {
-		if (Bukkit.getPluginManager().getPlugin(plugin) != null) {
-			Common.Log("&fHooked with: " + plugin + (message == null ? "" : " (" + message + ")"));
-			return true;
+			for (Player receiver : CompatProvider.getAllPlayers()) {
+				if (receiver.getWorld().getName().equals(sender.getWorld().getName()))
+					if (Common.hasPerm(sender, Permissions.Formatter.OVERRIDE_RANGED_WORLD) || playerLocation.distanceSquared(receiver.getLocation()) <= squaredDistance) {
+						recipients.add(receiver);
+						continue;
+					}
+				
+				if (Common.hasPerm(receiver, Permissions.Formatter.SPY))
+					Common.tell(receiver, replaceAllVariables(sender, Settings.Chat.Formatter.SPY_FORMAT.replace("%message", message).replace("%displayname", sender.getDisplayName())));
+			}
+
+			return recipients;
+		} catch (ArrayIndexOutOfBoundsException ex) {
+			Common.Log("(Range Chat) Got " + ex.getMessage() + ", trying (limited) backup.");
+			Writer.Write(Writer.ERROR_PATH, "Range Chat", sender.getName() + ": \'" + message + "\' Resulted in error: " + ex.getMessage());
+
+			if (Common.hasPerm(sender, Permissions.Formatter.OVERRIDE_RANGED_WORLD)) {
+				for (Player recipient : CompatProvider.getAllPlayers())
+					if (recipient.getWorld().equals(sender.getWorld()))
+						recipients.add(recipient);
+
+			} else {
+				for (Entity en : sender.getNearbyEntities(range, range, range))
+					if (en.getType() == EntityType.PLAYER)
+						recipients.add((Player) en);
+			}
 		}
-		return false;
-	}
 
-	private String getWorldAlias(String world) {
-		if (mvHook == null)
-			return world;
-
-		return mvHook.getColoredAlias(world);
-	}
-
-	private String getNation(Player pl) {
-		if (townyHook == null)
-			return "";
-
-		return townyHook.getNation(pl);
-	}
-
-	private String getTown(Player pl) {
-		if (townyHook == null)
-			return "";
-
-		return townyHook.getTownName(pl);
-	}
-
-	private String getClanTag(Player pl) {
-		if (clansHook == null)
-			return "";
-		
-		return clansHook.getClanTag(pl);
+		return recipients;
 	}
 }
 

@@ -11,33 +11,22 @@ import net.milkbowl.vault.economy.Economy;
 
 public class VaultHook {
 
-	private Chat chat;
-	private Economy economy;
+	public static final boolean HOOKED;
+	
+	private static Chat chat;
+	private static Economy economy;
 
-	public VaultHook() {
-		ServicesManager services = Bukkit.getServicesManager();
+	private VaultHook() {
+	}	
 
-		RegisteredServiceProvider<Economy> economyProvider = services.getRegistration(net.milkbowl.vault.economy.Economy.class);		
-		if (economyProvider != null)
-			economy = economyProvider.getProvider();
-		else
-			Common.Log("&cEconomy plugin not found");
-		
-		RegisteredServiceProvider<Chat> chatProvider = services.getRegistration(net.milkbowl.vault.chat.Chat.class);		
-		if (chatProvider != null)
-			chat = chatProvider.getProvider();
-		else
-			Common.LogInFrame(true, "You have enabled chat formatter", "but no permissions and chat", "plugin was found!");
-	}
-
-	public String getPlayerPrefix(Player pl) {
+	public static String getPlayerPrefix(Player pl) {
 		if (chat == null)
 			return "";
 
 		return chat.getPlayerPrefix(pl);
 	}
 
-	public String getPlayerSuffix(Player pl) {
+	public static String getPlayerSuffix(Player pl) {
 		if (chat == null)
 			return "";
 
@@ -45,8 +34,26 @@ public class VaultHook {
 	}
 
 	@SuppressWarnings("deprecation")
-	public void takeMoney(String player, double amount) {
+	public static void takeMoney(String player, double amount) {
 		if (economy != null)
 			economy.withdrawPlayer(player, amount);
+	}
+	
+	static {
+		HOOKED = Common.doesPluginExist("Vault");
+		
+		ServicesManager services = Bukkit.getServicesManager();
+
+		RegisteredServiceProvider<Economy> economyProvider = services.getRegistration(Economy.class);		
+		if (economyProvider != null)
+			economy = economyProvider.getProvider();
+		else
+			Common.Log("&cEconomy plugin not found");
+		
+		RegisteredServiceProvider<Chat> chatProvider = services.getRegistration(Chat.class);		
+		if (chatProvider != null)
+			chat = chatProvider.getProvider();
+		else
+			Common.LogInFrame(true, "You have enabled chat formatter", "but no permissions and chat", "plugin was found!", "Run /vault-info and check what is missing");
 	}
 }

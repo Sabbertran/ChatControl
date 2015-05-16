@@ -23,8 +23,11 @@ import kangarko.chatcontrol.filter.ConsoleFilter;
 import kangarko.chatcontrol.filter.Log4jFilter;
 import kangarko.chatcontrol.hooks.AuthMeHook;
 import kangarko.chatcontrol.hooks.EssentialsHook;
+import kangarko.chatcontrol.hooks.MultiverseHook;
 import kangarko.chatcontrol.hooks.ProtocolLibHook;
 import kangarko.chatcontrol.hooks.RushCoreHook;
+import kangarko.chatcontrol.hooks.SimpleClansHook;
+import kangarko.chatcontrol.hooks.TownyHook;
 import kangarko.chatcontrol.hooks.VaultHook;
 import kangarko.chatcontrol.listener.ChatListener;
 import kangarko.chatcontrol.listener.CommandListener;
@@ -32,7 +35,6 @@ import kangarko.chatcontrol.listener.PlayerListener;
 import kangarko.chatcontrol.rules.ChatCeaser;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
-import kangarko.chatcontrol.utils.CompatProvider.UnsupportedServerException;
 import kangarko.chatcontrol.utils.LagCatcher;
 import kangarko.chatcontrol.utils.Permissions;
 import kangarko.chatcontrol.utils.UpdateCheck;
@@ -43,17 +45,11 @@ public class ChatControl extends JavaPlugin {
 
 	private BukkitTask timedMessageTask;
 
-	// Player IP, Time
-	public static HashMap<String, Long> ipLastLogin = new HashMap<>();
-
 	// Player Name, Player Cache
 	private static HashMap<String, PlayerCache> playerData = new HashMap<>();
 
 	public static boolean muted = false;
 
-	public EssentialsHook ess;
-	public VaultHook vault;
-	public AuthMeHook authMe;
 	public ChatFormatter formatter;	
 	public ChatCeaser chatCeaser;
 
@@ -65,23 +61,12 @@ public class ChatControl extends JavaPlugin {
 			for (Player pl : CompatProvider.getAllPlayers())
 				getDataFor(pl);
 
+			setupDependencies();
 			ConfHelper.loadAll();
 
 			chatCeaser = new ChatCeaser();
 			chatCeaser.load();
-
-			if (doesPluginExist("Essentials"))
-				ess = new EssentialsHook();
-
-			if (doesPluginExist("Vault"))
-				vault = new VaultHook();
-
-			if (doesPluginExist("AuthMe"))
-				authMe = new AuthMeHook();
-
-			if (doesPluginExist("RushCore"))
-				RushCoreHook.zapnute = true;
-
+			
 			getServer().getPluginManager().registerEvents(new ChatListener(), this);
 			getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 			getServer().getPluginManager().registerEvents(new CommandListener(), this);
@@ -100,14 +85,14 @@ public class ChatControl extends JavaPlugin {
 				}
 
 			if (Settings.Packets.ENABLED)
-				if (doesPluginExist("ProtocolLib")) {
+				if (ProtocolLibHook.HOOKED)
 					ProtocolLibHook.init();
-				} else
+				else
 					Common.LogInFrame(false, "Cannot enable packet features!", "Required plugin missing: ProtocolLib");
 
 			if (Settings.Chat.Formatter.ENABLED)
-				if (vault != null) {
-					if (doesPluginExist("ChatManager"))
+				if (VaultHook.HOOKED) {
+					if (Common.doesPluginExist("ChatManager"))
 						Common.LogInFrame(true, "Detected &fChatManager&c! Please copy", "settings from it to ChatControl", "and disable the plugin afterwards!");
 					else {
 						formatter = new ChatFormatter();
@@ -145,7 +130,7 @@ public class ChatControl extends JavaPlugin {
 			} else if (t instanceof IllegalLocaleException)
 				Common.Log(" &cChatControl doesn't have the locale: " + Settings.LOCALIZATION_SUFFIX);
 
-			else if (t.getCause() != null && t.getCause() instanceof UnsupportedServerException) {
+			else if (t.getCause() != null && t.getCause() instanceof UnsupportedOperationException) {
 				if (getServer().getBukkitVersion().startsWith("1.2.5"))
 					Common.Log(" &cSorry but Minecraft 1.2.5 is no longer supported!");
 				else {
@@ -177,9 +162,7 @@ public class ChatControl extends JavaPlugin {
 	public void onDisable() {
 		muted = false;
 		playerData.clear();
-		ipLastLogin.clear();
 
-		RushCoreHook.zapnute = false;
 		UpdateCheck.needsUpdate = false;
 		getServer().getScheduler().cancelTasks(this);
 
@@ -289,26 +272,28 @@ public class ChatControl extends JavaPlugin {
 		}.runTaskTimer(this, 20, 20 * Settings.Messages.TIMED_DELAY_SECONDS);
 	}
 
-	public boolean doesPluginExist(String pluginName) {
-		Plugin plugin = getServer().getPluginManager().getPlugin(pluginName);
-
-		if (plugin != null) {
-			Common.Log("&fHooked with: " + pluginName);
-			return true;
-		}
-		return false;
+	private void setupDependencies() {
+		// Unable to find a nicer solution.
+		if (AuthMeHook.HOOKED);
+		if (EssentialsHook.HOOKED);
+		if (ProtocolLibHook.HOOKED);
+		if (MultiverseHook.HOOKED);
+		if (RushCoreHook.HOOKED);
+		if (SimpleClansHook.HOOKED);
+		if (TownyHook.HOOKED);
+		if (VaultHook.HOOKED);
 	}
-
+	
 	// ------------------------ static ------------------------
 
 	public static PlayerCache getDataFor(Player pl) {
 		return getDataFor(pl.getName());
 	}
 
-	public static PlayerCache getDataFor(String pl) {
+	public static PlayerCache getDataFor(String pl) {		
 		PlayerCache cache = playerData.get(pl);
 
-		if (cache == null) {
+		if (cache == null) {			
 			cache = new PlayerCache();
 			playerData.put(pl, cache);
 		}
@@ -317,11 +302,8 @@ public class ChatControl extends JavaPlugin {
 	}
 
 	public static ChatControl instance() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new ChatControl();
-
-			Common.Warn("ChatControl instance is null! Was the plugin reloaded? Creating new.");
-		}
 
 		return instance;
 	}

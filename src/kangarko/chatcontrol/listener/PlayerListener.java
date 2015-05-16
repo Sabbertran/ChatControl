@@ -1,6 +1,5 @@
 package kangarko.chatcontrol.listener;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,6 +15,7 @@ import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.PlayerCache;
 import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
+import kangarko.chatcontrol.hooks.AuthMeHook;
 import kangarko.chatcontrol.hooks.RushCoreHook;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
@@ -27,14 +27,11 @@ public class PlayerListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void onPreLogin(AsyncPlayerPreLoginEvent e) {
-		long now = System.currentTimeMillis() / 1000L;
-		String ip = e.getAddress().getHostAddress();
-
-		if (ChatControl.ipLastLogin.containsKey(ip) && ChatControl.ipLastLogin.get(ip) > Settings.AntiBot.REJOIN_TIME) {
-			if (Settings.AntiBot.REJOIN_TIME - (now - ChatControl.ipLastLogin.get(ip)) <= 0)
-				return;
-
-			long time = Settings.AntiBot.REJOIN_TIME - (now - ChatControl.ipLastLogin.get(ip));
+		PlayerCache plData = ChatControl.getDataFor(e.getName());
+		long difference = (System.currentTimeMillis() / 1000L) - plData.lastLogin;
+		
+		if (plData.lastLogin > 0 && difference < Settings.AntiBot.REJOIN_TIME) {
+			long time = Settings.AntiBot.REJOIN_TIME - difference;
 			String msg = Common.colorize(Localization.ANTIBOT_REJOIN_WAIT_MESSAGE.replace("%time", String.valueOf(time)).replace("%seconds", Localization.Parts.SECONDS.formatNumbers(time)));
 			msg.split("\n");
 
@@ -47,13 +44,14 @@ public class PlayerListener implements Listener {
 		LagCatcher.start("Join event");
 
 		long now = System.currentTimeMillis() / 1000L;
-
+		PlayerCache plData = ChatControl.getDataFor(e.getPlayer());
+		
 		if (!Common.hasPerm(e.getPlayer(), Permissions.Bypasses.REJOIN))
-			ChatControl.ipLastLogin.put(e.getPlayer().getAddress().getAddress().getHostAddress(), now);
+			plData.lastLogin = now;
 
-		ChatControl.getDataFor(e.getPlayer()).loginLocation = e.getPlayer().getLocation();
+		plData.loginLocation = e.getPlayer().getLocation();
 
-		if (e.getPlayer().getName().equals("kangarko") && !RushCoreHook.zapnute)
+		if (e.getPlayer().getName().equals("kangarko") && !RushCoreHook.HOOKED)
 			Common.tellLater(e.getPlayer(), 30,
 					Common.consoleLine(),
 					"&e Na serveri je nainstalovany ChatControl v" + ChatControl.instance().getDescription().getVersion() + "!",
@@ -93,7 +91,7 @@ public class PlayerListener implements Listener {
 			return;
 		}
 
-		if (Settings.Messages.QUIT_ONLY_WHEN_LOGGED && ChatControl.instance().authMe != null && !ChatControl.instance().authMe.isLogged(e.getPlayer())) {
+		if (Settings.Messages.QUIT_ONLY_WHEN_LOGGED && !AuthMeHook.isLogged(e.getPlayer())) {
 			e.setQuitMessage(null);
 			return;
 		}

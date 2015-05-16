@@ -1,3 +1,7 @@
+/*
+ * All rights reserved.
+ * Copyright kangarko (c) 2015 
+ */
 package kangarko.chatcontrol.parser;
 
 import java.lang.reflect.Field;
@@ -17,11 +21,14 @@ public
 /** Critical warning:
  *  only @God knows how
  *  this */ class /** works!
-    @author kangarko */
+ */
  ProcessingEngine {
 
 	static final String CODE_DELIMITER = " -> ";
 
+	private ProcessingEngine() {
+	}
+	
 	public static Object process(String input) throws Exception {
 		return process(input, null);
 	}

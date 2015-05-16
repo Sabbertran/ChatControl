@@ -11,6 +11,9 @@ package kangarko.chatcontrol.utils;
  * Here the permission is: chatcontrol.commands.mute
  */
 public class Permissions {
+	
+	private Permissions() {
+	}
 
 	public class Commands {
 		// Permission muting game chat with "/chc mute" command.

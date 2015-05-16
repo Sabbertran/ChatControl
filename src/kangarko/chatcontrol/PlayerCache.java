@@ -13,4 +13,6 @@ public class PlayerCache {
 	public long lastCommandTime = 0;
 
 	public Location loginLocation = null;
+	public long lastLogin = 0;
+
 }

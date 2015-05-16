@@ -10,6 +10,7 @@ import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.PlayerCache;
 import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
+import kangarko.chatcontrol.hooks.EssentialsHook;
 import kangarko.chatcontrol.hooks.RushCoreHook;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
@@ -101,11 +102,11 @@ public class CommandListener implements Listener {
 		if (Settings.Writer.ENABLED && !Settings.Writer.WHITELIST_PLAYERS.contains(pl.getName().toLowerCase()))
 			for (String prikaz : Settings.Writer.INCLUDE_COMMANDS)
 				if (command.toLowerCase().startsWith("/" + prikaz.toLowerCase()))
-					Writer.Write(Writer.CHAT_FILE_PATH, "[CMD] " + pl.getName(), command);
+					Writer.Write(Writer.CHAT_PATH, "[CMD] " + pl.getName(), command);
 
 		sound: if (Settings.SoundNotify.ENABLED_IN_COMMANDS.contains(args[0].replaceFirst("/", "")))
-			if (ChatControl.instance().ess != null && (command.startsWith("/r ") || command.startsWith("/reply "))) {
-				Player reply = ChatControl.instance().ess.getReplyTo(pl.getName());
+			if (EssentialsHook.HOOKED && (command.startsWith("/r ") || command.startsWith("/reply "))) {
+				Player reply = EssentialsHook.getReplyTo(pl.getName());
 
 				if (reply != null && (Common.hasPerm(reply, Permissions.Notify.WHEN_MENTIONED) || RushCoreHook.moznoPrehratZvuk(reply.getName())))
 					reply.playSound(reply.getLocation(), Settings.SoundNotify.SOUND.sound, Settings.SoundNotify.SOUND.volume, Settings.SoundNotify.SOUND.pitch);

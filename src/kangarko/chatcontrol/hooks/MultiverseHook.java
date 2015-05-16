@@ -5,20 +5,30 @@ import org.bukkit.Bukkit;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 
+import kangarko.chatcontrol.utils.Common;
+
 public class MultiverseHook {
 
-	private final MultiverseCore multiVerse;
+	public static final boolean HOOKED;
+	private static final MultiverseCore multiVerse;
 
-	public MultiverseHook() {
-		multiVerse = (MultiverseCore) Bukkit.getPluginManager().getPlugin("Multiverse-Core");
+	private MultiverseHook() {
 	}
 
-	public String getColoredAlias(String world) {
+	public static String getWorldAlias(String world) {
+		if (!HOOKED)
+			return world;
+		
 		MultiverseWorld mvWorld = multiVerse.getMVWorldManager().getMVWorld(world);
 
 		if (mvWorld != null)
 			return mvWorld.getColoredWorldString();
 
 		return world;
+	}
+	
+	static {
+		HOOKED = Common.doesPluginExist("Multiverse-Core");
+		multiVerse = HOOKED ? (MultiverseCore) Bukkit.getPluginManager().getPlugin("Multiverse-Core") : null;
 	}
 }

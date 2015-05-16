@@ -12,6 +12,9 @@ public class CompatProvider {
 	private static Method getPlayersMethod;
 	private static boolean isGetPlayersCollection = false;
 
+	private CompatProvider() {
+	}
+	
 	public static Collection<? extends Player> getAllPlayers() {
 		return isGetPlayersCollection ? Bukkit.getOnlinePlayers() : Arrays.asList( (Player[]) getRawPlayers());
 	}
@@ -19,7 +22,6 @@ public class CompatProvider {
 	private static Object getRawPlayers() {
 		try {
 			return getPlayersMethod.invoke(null);
-
 		} catch (ReflectiveOperationException ex) {
 			throw new RuntimeException("Reflection malfunction", ex);
 		}
@@ -27,21 +29,16 @@ public class CompatProvider {
 
 	static {
 		try {
-			Class.forName("org.bukkit.Sound"); // test for too old craftbukkits			
+			Class.forName("org.bukkit.Sound"); // test for too old craftbukkits
 			getPlayersMethod = Bukkit.class.getMethod("getOnlinePlayers");
 
 			if (getPlayersMethod.getReturnType() == Collection.class)
 				isGetPlayersCollection = true;			
 
 		} catch (ReflectiveOperationException ex) {
-			throw new UnsupportedServerException();
+			throw new UnsupportedOperationException();
 		}
 
 		Common.Debug("&7[Reflection] &bUsing " + (isGetPlayersCollection ? "&anew" : "&cold") + " &bgetter for players");
-	}
-
-	public static class UnsupportedServerException extends RuntimeException {
-		private static final long serialVersionUID = 1L;
-
 	}
 }
