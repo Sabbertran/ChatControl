@@ -6,19 +6,9 @@ import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
-import kangarko.chatcontrol.utils.Common;
-
 public class TownyHook {
 
-	public static final boolean HOOKED;
-
-	private TownyHook() {
-	}
-
-	public static String getNation(Player pl) {
-		if (!HOOKED)
-			return "";
-		
+	public String getNation(Player pl) {
 		try {
 			Town t = getTown(pl);
 
@@ -28,15 +18,13 @@ public class TownyHook {
 		}
 	}
 
-	public static String getTownName(Player pl) {
-		if (!HOOKED)
-			return "";
-		
+	public String getTownName(Player pl) {		
 		Town t = getTown(pl);
+		
 		return t != null ? t.getName() : "";
 	}
 
-	private static Town getTown(Player pl) {
+	private Town getTown(Player pl) {
 		try {
 			Resident res = TownyUniverse.getDataSource().getResident(pl.getName());
 
@@ -46,9 +34,5 @@ public class TownyHook {
 		}
 
 		return null;
-	}
-	
-	static {
-		HOOKED = Common.doesPluginExist("Towny");
 	}
 }
