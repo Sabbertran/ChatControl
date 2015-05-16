@@ -17,13 +17,14 @@ import kangarko.chatcontrol.rules.ChatCeaser.PacketCancelledException;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.Permissions;
 
-public class ProtocolLibHook extends Hook {
+public class ProtocolLibHook {
 
-	private final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
-	private final JSONParser parser = new JSONParser();
+	public static final boolean HOOKED;
+	
+	private static final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
+	private static final JSONParser parser = new JSONParser();
 
-	public void init() {
-		hooked = true;
+	public static void init() {
 		
 		if (Settings.Packets.TabComplete.DISABLE) {
 			manager.addPacketListener(new PacketAdapter(ChatControl.instance(), PacketType.Play.Client.TAB_COMPLETE) {
@@ -88,5 +89,9 @@ public class ProtocolLibHook extends Hook {
 				}
 			});
 		}
+	}
+	
+	static {
+		HOOKED = Common.doesPluginExist("ProtocolLib");		
 	}
 }

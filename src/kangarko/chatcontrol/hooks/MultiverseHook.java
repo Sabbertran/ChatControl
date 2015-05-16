@@ -7,17 +7,16 @@ import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 
 import kangarko.chatcontrol.utils.Common;
 
-public class MultiverseHook extends Hook {
+public class MultiverseHook {
 
-	private final MultiverseCore multiVerse;
+	public static final boolean HOOKED;
+	private static final MultiverseCore multiVerse;
 
-	public MultiverseHook() {
-		hooked = Common.doesPluginExist("Multiverse-Core");
-		multiVerse = hooked ? (MultiverseCore) Bukkit.getPluginManager().getPlugin("Multiverse-Core") : null;
+	private MultiverseHook() {
 	}
 
-	public String getWorldAlias(String world) {
-		if (!hooked)
+	public static String getWorldAlias(String world) {
+		if (!HOOKED)
 			return world;
 		
 		MultiverseWorld mvWorld = multiVerse.getMVWorldManager().getMVWorld(world);
@@ -26,5 +25,10 @@ public class MultiverseHook extends Hook {
 			return mvWorld.getColoredWorldString();
 
 		return world;
+	}
+	
+	static {
+		HOOKED = Common.doesPluginExist("Multiverse-Core");
+		multiVerse = HOOKED ? (MultiverseCore) Bukkit.getPluginManager().getPlugin("Multiverse-Core") : null;
 	}
 }

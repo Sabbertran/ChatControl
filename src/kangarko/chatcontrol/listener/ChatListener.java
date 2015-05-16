@@ -129,7 +129,7 @@ public class ChatListener implements Listener {
 		if (Settings.Writer.ENABLED && !Settings.Writer.WHITELIST_PLAYERS.contains(pl.getName().toLowerCase()))
 			Writer.Write(Writer.CHAT_PATH, pl.getName(), message);
 
-		if (Settings.SoundNotify.ENABLED && !RushCoreHook.hooked)
+		if (Settings.SoundNotify.ENABLED && !RushCoreHook.HOOKED)
 			if (Settings.SoundNotify.CHAT_PREFIX.equalsIgnoreCase("none")) {
 				for (Player online : CompatProvider.getAllPlayers())
 					if (message.toLowerCase().contains(online.getName().toLowerCase()) && canSoundNotify(online.getName()) && Common.hasPerm(online, Permissions.Notify.WHEN_MENTIONED))

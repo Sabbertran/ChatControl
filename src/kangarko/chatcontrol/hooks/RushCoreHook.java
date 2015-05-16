@@ -4,23 +4,28 @@ import kangarko.chatcontrol.utils.Common;
 import kangarko.rushcore.misc.PlayerInfo;
 
 // A hook with my custom plugin on my server.
-public class RushCoreHook extends Hook {
+public class RushCoreHook {
+
+	public static final boolean HOOKED;
 	
-	public RushCoreHook() {
-		hooked = Common.doesPluginExist("RushCore");
+	private RushCoreHook() {
 	}
 	
-	public boolean moznoPrehratZvuk(String hraca) {
-		if (!hooked)
+	public static boolean moznoPrehratZvuk(String hraca) {
+		if (!HOOKED)
 			return true;
 		
 		return PlayerInfo.of(hraca).zvukRp;
 	}
 	
-	public boolean moznoZobrazitSpravu(String hraca) {
-		if (!hooked)
+	public static boolean moznoZobrazitSpravu(String hraca) {
+		if (!HOOKED)
 			return true;
 
 		return PlayerInfo.of(hraca).spravyTip;
+	}
+	
+	static {
+		HOOKED = Common.doesPluginExist("RushCore");
 	}
 }

@@ -274,11 +274,11 @@ public class ChatControl extends JavaPlugin {
 
 	private void setupDependencies() {
 		// Unable to find a nicer solution.
-		if (AuthMeHook.hooked);
-		if (EssentialsHook.hooked);
+		if (AuthMeHook.HOOKED);
+		if (EssentialsHook.HOOKED);
 		if (ProtocolLibHook.HOOKED);
-		if (MultiverseHook.hooked);
-		if (RushCoreHook.hooked);
+		if (MultiverseHook.HOOKED);
+		if (RushCoreHook.HOOKED);
 		if (SimpleClansHook.HOOKED);
 		if (TownyHook.HOOKED);
 		if (VaultHook.HOOKED);
