@@ -4,7 +4,9 @@ import kangarko.chatcontrol.utils.Common;
 import kangarko.rushcore.misc.PlayerInfo;
 
 // A hook with my custom plugin on my server.
-public class RushCoreHook extends Hook {
+public class RushCoreHook {
+
+	public static final boolean HOOKED;
 	
 	private RushCoreHook() {
 	}

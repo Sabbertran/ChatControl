@@ -10,13 +10,15 @@ import kangarko.chatcontrol.utils.Common;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 
-public class VaultHook extends Hook {
+public class VaultHook {
+
+	public static final boolean HOOKED;
 	
 	private static Chat chat;
 	private static Economy economy;
 
 	private VaultHook() {
-	}
+	}	
 
 	public static String getPlayerPrefix(Player pl) {
 		if (chat == null)

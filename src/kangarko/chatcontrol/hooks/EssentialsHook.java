@@ -9,7 +9,9 @@ import com.earth2me.essentials.User;
 
 import kangarko.chatcontrol.utils.Common;
 
-public class EssentialsHook extends Hook {
+public class EssentialsHook {
+
+	public static final boolean HOOKED;
 	
 	private static final Essentials ess;
 	

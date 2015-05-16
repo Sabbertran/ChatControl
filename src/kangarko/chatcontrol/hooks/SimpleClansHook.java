@@ -8,8 +8,9 @@ import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 
-public class SimpleClansHook extends Hook {
+public class SimpleClansHook {
 
+	public static final boolean HOOKED;
 	private static final SimpleClans clans;
 
 	private SimpleClansHook() {

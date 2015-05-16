@@ -7,8 +7,9 @@ import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 
 import kangarko.chatcontrol.utils.Common;
 
-public class MultiverseHook extends Hook {
+public class MultiverseHook {
 
+	public static final boolean HOOKED;
 	private static final MultiverseCore multiVerse;
 
 	private MultiverseHook() {

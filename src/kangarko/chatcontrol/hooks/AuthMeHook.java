@@ -5,7 +5,9 @@ import org.bukkit.entity.Player;
 import fr.xephi.authme.api.API;
 import kangarko.chatcontrol.utils.Common;
 
-public class AuthMeHook extends Hook {
+public class AuthMeHook {
+	
+	public static final boolean HOOKED;
 	
 	private AuthMeHook() {
 	}

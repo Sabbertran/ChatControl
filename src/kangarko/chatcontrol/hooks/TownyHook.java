@@ -8,7 +8,9 @@ import com.palmergames.bukkit.towny.object.TownyUniverse;
 
 import kangarko.chatcontrol.utils.Common;
 
-public class TownyHook extends Hook {
+public class TownyHook {
+
+	public static final boolean HOOKED;
 
 	private TownyHook() {
 	}

@@ -17,8 +17,10 @@ import kangarko.chatcontrol.rules.ChatCeaser.PacketCancelledException;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.Permissions;
 
-public class ProtocolLibHook extends Hook {
+public class ProtocolLibHook {
 
+	public static final boolean HOOKED;
+	
 	private static final ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 	private static final JSONParser parser = new JSONParser();
 
