@@ -283,7 +283,7 @@ public class ChatControl extends JavaPlugin {
 		if (TownyHook.HOOKED);
 		if (VaultHook.HOOKED);
 	}
-	
+
 	// ------------------------ static ------------------------
 
 	public static PlayerCache getDataFor(Player pl) {

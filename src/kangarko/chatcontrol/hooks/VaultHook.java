@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicesManager;
 
+import kangarko.chatcontrol.config.Settings;
 import kangarko.chatcontrol.utils.Common;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -53,7 +54,7 @@ public class VaultHook {
 		RegisteredServiceProvider<Chat> chatProvider = services.getRegistration(Chat.class);		
 		if (chatProvider != null)
 			chat = chatProvider.getProvider();
-		else
+		else if (Settings.Chat.Formatter.ENABLED)
 			Common.LogInFrame(true, "You have enabled chat formatter", "but no permissions and chat", "plugin was found!", "Run /vault-info and check what is missing");
 	}
 }
