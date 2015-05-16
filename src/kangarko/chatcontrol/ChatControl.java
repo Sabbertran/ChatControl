@@ -83,7 +83,7 @@ public class ChatControl extends JavaPlugin {
 					Bukkit.getLogger().setFilter(filter);
 					Common.Debug("Console filtering initiated (MC 1.6.4 and lower).");
 				}
-
+			
 			if (Settings.Packets.ENABLED)
 				if (ProtocolLibHook.HOOKED)
 					ProtocolLibHook.init();
