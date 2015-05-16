@@ -5,37 +5,32 @@ import org.bukkit.entity.Player;
 import fr.xephi.authme.api.API;
 import kangarko.chatcontrol.utils.Common;
 
-public class AuthMeHook {
+public class AuthMeHook extends Hook {
 	
-	public static final boolean HOOKED;
-	
-	private AuthMeHook() {
+	public AuthMeHook() {
+		hooked = Common.doesPluginExist("AuthMe");
 	}
 	
-	public static String getCountryCode(Player pl) {
-		if (!HOOKED)
+	public String getCountryCode(Player pl) {
+		if (!hooked)
 			return "";
 		
 		String ip = pl.getAddress().toString().replace("/", "");
 		return API.instance.getCountryCode(ip);
 	}
 
-	public static String getCountryName(Player pl) {
-		if (!HOOKED)
+	public String getCountryName(Player pl) {
+		if (!hooked)
 			return "";
 		
 		String ip = pl.getAddress().toString().replace("/", "");
 		return API.instance.getCountryName(ip);
 	}
 	
-	public static boolean isLogged(Player pl) {
-		if (!HOOKED)
+	public boolean isLogged(Player pl) {
+		if (!hooked)
 			return true;
 		
 		return API.isAuthenticated(pl);
-	}
-	
-	static {
-		HOOKED = Common.doesPluginExist("AuthMe");
 	}
 }

@@ -105,7 +105,7 @@ public class CommandListener implements Listener {
 					Writer.Write(Writer.CHAT_PATH, "[CMD] " + pl.getName(), command);
 
 		sound: if (Settings.SoundNotify.ENABLED_IN_COMMANDS.contains(args[0].replaceFirst("/", "")))
-			if (EssentialsHook.HOOKED && (command.startsWith("/r ") || command.startsWith("/reply "))) {
+			if (EssentialsHook.hooked && (command.startsWith("/r ") || command.startsWith("/reply "))) {
 				Player reply = EssentialsHook.getReplyTo(pl.getName());
 
 				if (reply != null && (Common.hasPerm(reply, Permissions.Notify.WHEN_MENTIONED) || RushCoreHook.moznoPrehratZvuk(reply.getName())))

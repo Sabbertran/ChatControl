@@ -41,8 +41,8 @@ public class CommandsHandler implements CommandExecutor {
 			Common.tell(sender,
 					"&8-----------------------------------------------------|",
 					"&3ChatControl &8// &fRunning &7v" + ChatControl.instance().getDescription().getVersion(),
-					"&3ChatControl &8// &fBy &7kangarko &f© 2013 - 2015",
-					(!RushCoreHook.HOOKED && Bukkit.getIp().startsWith("93.91") ? "&3ChatControl &8// &fNavstivte: &7http://rushmine.6f.sk" + (new Random().nextInt(5) == 1 ? " &b< Prid si zahrat!" : "") : ""));
+					"&3ChatControl &8// &fBy &7kangarko &fï¿½ 2013 - 2015",
+					(!RushCoreHook.hooked && Bukkit.getIp().startsWith("93.91") ? "&3ChatControl &8// &fNavstivte: &7http://rushmine.6f.sk" + (new Random().nextInt(5) == 1 ? " &b< Prid si zahrat!" : "") : ""));
 			return;
 		}
 

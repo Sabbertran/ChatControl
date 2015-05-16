@@ -9,25 +9,25 @@ import com.earth2me.essentials.User;
 
 import kangarko.chatcontrol.utils.Common;
 
-public class EssentialsHook {
+public class EssentialsHook extends Hook {
 
-	public static final boolean HOOKED;
-	
-	private static final Essentials ess;
+	private final Essentials ess;
 	
 	private EssentialsHook() {
+		hooked = Common.doesPluginExist("Essentials");
+		ess = hooked ? (Essentials) Bukkit.getPluginManager().getPlugin("Essentials") : null;
 	}
 
-	public static boolean isAfk(String pl) {
-		if (!HOOKED)
+	public boolean isAfk(String pl) {
+		if (!hooked)
 			return false;
 		
 		User user = getUser(pl);
 		return user != null ? user.isAfk() : false;
 	}
 
-	public static Player getReplyTo(String pl) {
-		if (!HOOKED)
+	public Player getReplyTo(String pl) {
+		if (!hooked)
 			return null;
 		
 		CommandSource source = getUser(pl).getReplyTo();
@@ -41,12 +41,7 @@ public class EssentialsHook {
 		return null;
 	}
 	
-	private static User getUser(String pl) {
+	private User getUser(String pl) {
 		return ess.getUserMap().getUser(pl);
-	}
-	
-	static {
-		HOOKED = Common.doesPluginExist("Essentials");
-		ess = HOOKED ? (Essentials) Bukkit.getPluginManager().getPlugin("Essentials") : null;
 	}
 }

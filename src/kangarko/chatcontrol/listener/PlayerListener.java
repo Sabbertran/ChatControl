@@ -51,7 +51,7 @@ public class PlayerListener implements Listener {
 
 		plData.loginLocation = e.getPlayer().getLocation();
 
-		if (e.getPlayer().getName().equals("kangarko") && !RushCoreHook.HOOKED)
+		if (e.getPlayer().getName().equals("kangarko") && !RushCoreHook.hooked)
 			Common.tellLater(e.getPlayer(), 30,
 					Common.consoleLine(),
 					"&e Na serveri je nainstalovany ChatControl v" + ChatControl.instance().getDescription().getVersion() + "!",
