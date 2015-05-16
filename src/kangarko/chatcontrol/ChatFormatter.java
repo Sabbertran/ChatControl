@@ -15,11 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import kangarko.chatcontrol.config.Settings;
-import kangarko.chatcontrol.hooks.AuthMeHook;
-import kangarko.chatcontrol.hooks.MultiverseHook;
-import kangarko.chatcontrol.hooks.SimpleClansHook;
-import kangarko.chatcontrol.hooks.TownyHook;
-import kangarko.chatcontrol.hooks.VaultHook;
+import kangarko.chatcontrol.hooks.HookManager;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.Permissions;
@@ -97,18 +93,18 @@ public class ChatFormatter implements Listener {
 	public String replacePlayerVariables(Player pl, String format) {
 		String world = pl.getWorld().getName();
 		
-		format = format.replace("%countrycode", AuthMeHook.getCountryCode(pl))
-					   .replace("%countryname", AuthMeHook.getCountryName(pl));
+		format = format.replace("%countrycode", HookManager.getCountryCode(pl))
+					   .replace("%countryname", HookManager.getCountryName(pl));
 
 		return format
-				.replace("%pl_prefix", formatColor(VaultHook.getPlayerPrefix(pl)))
-				.replace("%pl_suffix", formatColor(VaultHook.getPlayerSuffix(pl)))
-				.replace("%world", MultiverseHook.getWorldAlias(world))
+				.replace("%pl_prefix", formatColor(HookManager.getPlayerPrefix(pl)))
+				.replace("%pl_suffix", formatColor(HookManager.getPlayerSuffix(pl)))
+				.replace("%world", HookManager.getWorldAlias(world))
 				.replace("%health", formatHealth(pl) + ChatColor.RESET)
 				.replace("%player", pl.getName())
-				.replace("%town", TownyHook.getTownName(pl))
-				.replace("%nation", TownyHook.getNation(pl))
-				.replace("%clan", SimpleClansHook.getClanTag(pl));
+				.replace("%town", HookManager.getTownName(pl))
+				.replace("%nation", HookManager.getNation(pl))
+				.replace("%clan", HookManager.getClanTag(pl));
 	}
 
 	private String replaceTime(String msg) {

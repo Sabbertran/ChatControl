@@ -14,7 +14,7 @@ import kangarko.chatcontrol.config.ConfHelper;
 import kangarko.chatcontrol.config.ConfHelper.ChatMessage;
 import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
-import kangarko.chatcontrol.hooks.RushCoreHook;
+import kangarko.chatcontrol.hooks.HookManager;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.Permissions;
@@ -42,7 +42,7 @@ public class CommandsHandler implements CommandExecutor {
 					"&8-----------------------------------------------------|",
 					"&3ChatControl &8// &fRunning &7v" + ChatControl.instance().getDescription().getVersion(),
 					"&3ChatControl &8// &fBy &7kangarko &f© 2013 - 2015",
-					(!RushCoreHook.HOOKED && Bukkit.getIp().startsWith("93.91") ? "&3ChatControl &8// &fNavstivte: &7http://rushmine.6f.sk" + (new Random().nextInt(5) == 1 ? " &b< Prid si zahrat!" : "") : ""));
+					(!HookManager.isRushCoreLoaded() && Bukkit.getIp().startsWith("93.91") ? "&3ChatControl &8// &fNavstivte: &7http://rushmine.6f.sk" + (new Random().nextInt(5) == 1 ? " &b< Prid si zahrat!" : "") : ""));
 			return;
 		}
 

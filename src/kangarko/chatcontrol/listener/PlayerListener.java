@@ -15,8 +15,7 @@ import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.PlayerCache;
 import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
-import kangarko.chatcontrol.hooks.AuthMeHook;
-import kangarko.chatcontrol.hooks.RushCoreHook;
+import kangarko.chatcontrol.hooks.HookManager;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.LagCatcher;
@@ -51,7 +50,7 @@ public class PlayerListener implements Listener {
 
 		plData.loginLocation = e.getPlayer().getLocation();
 
-		if (e.getPlayer().getName().equals("kangarko") && !RushCoreHook.HOOKED)
+		if (e.getPlayer().getName().equals("kangarko") && !HookManager.isRushCoreLoaded())
 			Common.tellLater(e.getPlayer(), 30,
 					Common.consoleLine(),
 					"&e Na serveri je nainstalovany ChatControl v" + ChatControl.instance().getDescription().getVersion() + "!",
@@ -91,7 +90,7 @@ public class PlayerListener implements Listener {
 			return;
 		}
 
-		if (Settings.Messages.QUIT_ONLY_WHEN_LOGGED && !AuthMeHook.isLogged(e.getPlayer())) {
+		if (Settings.Messages.QUIT_ONLY_WHEN_LOGGED && !HookManager.isLogged(e.getPlayer())) {
 			e.setQuitMessage(null);
 			return;
 		}

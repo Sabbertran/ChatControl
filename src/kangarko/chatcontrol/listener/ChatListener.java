@@ -10,8 +10,7 @@ import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.PlayerCache;
 import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
-import kangarko.chatcontrol.hooks.EssentialsHook;
-import kangarko.chatcontrol.hooks.RushCoreHook;
+import kangarko.chatcontrol.hooks.HookManager;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.Permissions;
@@ -129,7 +128,7 @@ public class ChatListener implements Listener {
 		if (Settings.Writer.ENABLED && !Settings.Writer.WHITELIST_PLAYERS.contains(pl.getName().toLowerCase()))
 			Writer.Write(Writer.CHAT_PATH, pl.getName(), message);
 
-		if (Settings.SoundNotify.ENABLED && !RushCoreHook.HOOKED)
+		if (Settings.SoundNotify.ENABLED && !HookManager.isRushCoreLoaded())
 			if (Settings.SoundNotify.CHAT_PREFIX.equalsIgnoreCase("none")) {
 				for (Player online : CompatProvider.getAllPlayers())
 					if (message.toLowerCase().contains(online.getName().toLowerCase()) && canSoundNotify(online.getName()) && Common.hasPerm(online, Permissions.Notify.WHEN_MENTIONED))
@@ -146,6 +145,6 @@ public class ChatListener implements Listener {
 		if (!Settings.SoundNotify.ONLY_WHEN_AFK)
 			return true;
 
-		return EssentialsHook.isAfk(pl);
+		return HookManager.isAfk(pl);
 	}
 }

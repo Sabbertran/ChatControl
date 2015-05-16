@@ -21,14 +21,7 @@ import kangarko.chatcontrol.config.ConfHelper.InBuiltFileMissingException;
 import kangarko.chatcontrol.config.Settings;
 import kangarko.chatcontrol.filter.ConsoleFilter;
 import kangarko.chatcontrol.filter.Log4jFilter;
-import kangarko.chatcontrol.hooks.AuthMeHook;
-import kangarko.chatcontrol.hooks.EssentialsHook;
-import kangarko.chatcontrol.hooks.MultiverseHook;
-import kangarko.chatcontrol.hooks.ProtocolLibHook;
-import kangarko.chatcontrol.hooks.RushCoreHook;
-import kangarko.chatcontrol.hooks.SimpleClansHook;
-import kangarko.chatcontrol.hooks.TownyHook;
-import kangarko.chatcontrol.hooks.VaultHook;
+import kangarko.chatcontrol.hooks.HookManager;
 import kangarko.chatcontrol.listener.ChatListener;
 import kangarko.chatcontrol.listener.CommandListener;
 import kangarko.chatcontrol.listener.PlayerListener;
@@ -60,7 +53,8 @@ public class ChatControl extends JavaPlugin {
 
 			for (Player pl : CompatProvider.getAllPlayers())
 				getDataFor(pl);
-
+			
+			HookManager.loadDependencies();
 			ConfHelper.loadAll();
 
 			chatCeaser = new ChatCeaser();
@@ -84,13 +78,13 @@ public class ChatControl extends JavaPlugin {
 				}
 
 			if (Settings.Packets.ENABLED)
-				if (ProtocolLibHook.HOOKED)
-					ProtocolLibHook.init();
+				if (HookManager.isProtocolLibLoaded())
+					HookManager.initPacketListening();
 				else
 					Common.LogInFrame(false, "Cannot enable packet features!", "Required plugin missing: ProtocolLib");
 
 			if (Settings.Chat.Formatter.ENABLED)
-				if (VaultHook.HOOKED) {
+				if (HookManager.isVaultLoaded()) {
 					if (Common.doesPluginExist("ChatManager"))
 						Common.LogInFrame(true, "Detected &fChatManager&c! Please copy", "settings from it to ChatControl", "and disable the plugin afterwards!");
 					else {
@@ -251,7 +245,7 @@ public class ChatControl extends JavaPlugin {
 
 					if (world.equalsIgnoreCase("global")) {
 						for (Player online : CompatProvider.getAllPlayers())
-							if (!timed.keySet().contains(online.getWorld().getName()) && Common.hasPerm(online, Permissions.VIEW_TIMED_MESSAGES) && RushCoreHook.moznoZobrazitSpravu(online.getName()))
+							if (!timed.keySet().contains(online.getWorld().getName()) && Common.hasPerm(online, Permissions.VIEW_TIMED_MESSAGES) && HookManager.moznoZobrazitSpravu(online.getName()))
 								Common.tell(online, msg.replace("%world", online.getWorld().getName()));
 
 					} else {
@@ -261,7 +255,7 @@ public class ChatControl extends JavaPlugin {
 							Common.Warn("World \"" + world + "\" doesn't exist. No timed messages broadcast.");
 						else
 							for (Player online : bukkitworld.getPlayers())
-								if (Common.hasPerm(online, Permissions.VIEW_TIMED_MESSAGES) && RushCoreHook.moznoZobrazitSpravu(online.getName()))
+								if (Common.hasPerm(online, Permissions.VIEW_TIMED_MESSAGES) && HookManager.moznoZobrazitSpravu(online.getName()))
 									Common.tell(online, msg.replace("%world", world));
 					}
 				}

@@ -25,7 +25,7 @@ import org.json.simple.JSONObject;
 
 import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.config.Settings;
-import kangarko.chatcontrol.hooks.VaultHook;
+import kangarko.chatcontrol.hooks.HookManager;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.LagCatcher;
@@ -302,7 +302,7 @@ public final class ChatCeaser {
 				}
 
 				if (rule.getFine() != null)
-					VaultHook.takeMoney(pl.getName(), rule.getFine());
+					HookManager.takeMoney(pl.getName(), rule.getFine());
 
 				if (rule.getKickMessage() != null) {
 					final Player Pl = pl;
