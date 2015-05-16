@@ -163,13 +163,9 @@ public class Common {
 	}
 	
 	public static boolean doesPluginExist(String plugin) {
-		return doesPluginExist(plugin, null);
-	}
-	
-	public static boolean doesPluginExist(String plugin, String message) {
 		boolean hooked = Bukkit.getPluginManager().getPlugin(plugin) != null;
 		if (hooked)
-			Common.Log("&3Hooked into&8: &f" + plugin + (message != null ? "(" + message + ")" : ""));
+			Common.Log("&3Hooked into&8: &f" + plugin);
 		
 		return hooked;
 	}
