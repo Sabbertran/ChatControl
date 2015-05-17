@@ -140,10 +140,10 @@ public class ChatControl extends JavaPlugin {
 				Common.Log(" &ePlease inform the developer about this error.");
 
 			} else {
-				String error = "Unable to get error message, search above.";				
+				String error = "Unable to get the error message, search above.";				
 				if (t.getMessage() != null && !t.getMessage().isEmpty() && !t.getMessage().equalsIgnoreCase("null"))
 					error = t.getMessage();					
-				Common.Log(" &cThe error was: " + error);
+				Common.Log(" &cError: " + error);
 			}
 			Common.Log("&4!----------------------------------------------!");
 

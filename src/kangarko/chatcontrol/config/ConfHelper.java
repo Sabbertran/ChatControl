@@ -2,6 +2,7 @@ package kangarko.chatcontrol.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -44,7 +45,7 @@ public abstract class ConfHelper {
 		Settings.load();
 		Localization.load();
 	}
-
+	
 	protected static void loadValues(Class<?> clazz) throws Exception {
 		Objects.requireNonNull(cfg, "YamlConfiguration is null!");
 
@@ -75,8 +76,15 @@ public abstract class ConfHelper {
 				pathPrefix(null);
 			}
 		}
+		
+		ensureNonNull(clazz);
 	}
 
+	private static void ensureNonNull(Class<?> clazz) throws Exception {
+		for (Field f : clazz.getDeclaredFields())
+			Objects.requireNonNull(f.get(null), "Null field '" + f.getName() + "' in " + clazz.getName() + ".class!");
+	}
+	
 	private static void save() throws IOException {
 		if (file != null && save) {
 			cfg.options().header("!---------------------------------------------------------!\n" +
