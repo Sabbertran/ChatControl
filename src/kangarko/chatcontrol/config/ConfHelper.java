@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang.Validate;
@@ -15,6 +17,9 @@ import org.bukkit.Sound;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import kangarko.chatcontrol.ChatControl;
+import kangarko.chatcontrol.PlayerCache;
+import kangarko.chatcontrol.group.Group;
+import kangarko.chatcontrol.group.GroupSetting;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.Writer;
 
@@ -45,7 +50,7 @@ public abstract class ConfHelper {
 		Settings.load();
 		Localization.load();
 	}
-	
+
 	protected static void loadValues(Class<?> clazz) throws Exception {
 		Objects.requireNonNull(cfg, "YamlConfiguration is null!");
 
@@ -76,7 +81,7 @@ public abstract class ConfHelper {
 				pathPrefix(null);
 			}
 		}
-		
+
 		ensureNonNull(clazz);
 	}
 
@@ -84,17 +89,17 @@ public abstract class ConfHelper {
 		for (Field f : clazz.getDeclaredFields())
 			Objects.requireNonNull(f.get(null), "Null field '" + f.getName() + "' in " + clazz.getName() + ".class!");
 	}
-	
+
 	private static void save() throws IOException {
 		if (file != null && save) {
 			cfg.options().header("!---------------------------------------------------------!\n" +
-							"! File automatically updated at " + Common.getFormattedDate() + "\n" +
-							"! to plugin version v" + ChatControl.instance().getDescription().getVersion() + "\n" +
-							"!---------------------------------------------------------!\n" +
-							"! Unfortunatelly due to how Bukkit handles YAML\n"+
-							"! configurations, all comments (#) were wiped. \n" +
-							"! For reference values and comments visit\n" +
-							"! https://github.com/kangarko/chatcontrol\n" +
+					"! File automatically updated at " + Common.getFormattedDate() + "\n" +
+					"! to plugin version v" + ChatControl.instance().getDescription().getVersion() + "\n" +
+					"!---------------------------------------------------------!\n" +
+					"! Unfortunatelly due to how Bukkit handles YAML\n"+
+					"! configurations, all comments (#) were wiped. \n" +
+					"! For reference values and comments visit\n" +
+					"! https://github.com/kangarko/chatcontrol\n" +
 					"!---------------------------------------------------------!\n");
 			cfg.save(file);
 
@@ -115,6 +120,13 @@ public abstract class ConfHelper {
 	}
 
 	// --------------- Getters ---------------
+
+	private static Object getObject(String path, String def) {
+		path = addPathPrefix(path);
+		addDefault(path, def);
+
+		return cfg.get(path);
+	}
 
 	protected static boolean getBoolean(String path, boolean def) {
 		path = addPathPrefix(path);
@@ -171,11 +183,11 @@ public abstract class ConfHelper {
 		return keys;
 	}
 
-	protected static HashMap<String, String> getValuesAndKeys(String path, HashMap<String, String> def, boolean deep) {
+	protected static HashMap<String, Object> getValuesAndKeys(String path, HashMap<String, Object> def, boolean deep) {
 		path = addPathPrefix(path);
 
 		// add default
-		if (!cfg.isSet(path)) {
+		if (!cfg.isSet(path) && def != null) {
 			validate(path, def);
 
 			for (String str : def.keySet())
@@ -183,12 +195,12 @@ public abstract class ConfHelper {
 		}
 
 		Validate.isTrue(cfg.isConfigurationSection(path), "Malformed config value, expected configuration section at: " + path);
-		HashMap<String, String> keys = new HashMap<>();
+		HashMap<String, Object> keys = new HashMap<>();
 
 		for (String key : cfg.getConfigurationSection(path).getKeys(deep)) {
 			if (keys.containsKey(key))
 				Common.Warn("Duplicate key: " + key + " in " + path);
-			keys.put(key, getString(path + "." + key, ""));
+			keys.put(key, getObject(path + "." + key, ""));
 		}
 
 		return keys;
@@ -209,6 +221,37 @@ public abstract class ConfHelper {
 
 	protected static ChatMessage getMessage(String path, ChatMessage def) {
 		return new ChatMessage(getString(path, def.getMessage()));
+	}
+
+	protected static List<Group> getGroups(String path, List<Group> defaults) {
+		path = addPathPrefix(path);
+
+		// add default
+		if (!cfg.isConfigurationSection(path))
+			for (Group group : defaults) {
+				String groupPath = path + "." + group.getName();
+
+				if (!cfg.isSet(groupPath))
+					for (GroupSetting setting : group.getSettings())
+						addDefault(groupPath + "." + setting.getType(), setting.getValue());
+			}
+
+		// group name, settings
+		List<Group> groups = new ArrayList<>();
+
+		for (String groupName : cfg.getConfigurationSection(path).getKeys(false)) {
+			// type, value (UNPARSED)
+			HashMap<String, Object> settingsRaw = getValuesAndKeys(path + "." + groupName, null, false);
+
+			List<GroupSetting> settings = new ArrayList<>();
+
+			for (Map.Entry<String, Object> entry : settingsRaw.entrySet())
+				settings.add(new GroupSetting(GroupSetting.Type.parseType(entry.getKey()), entry.getValue()));
+
+			groups.add(new Group(groupName, settings));
+		}
+
+		return groups;
 	}
 
 	private static <T> void validate(String path, T def) {
@@ -247,7 +290,7 @@ public abstract class ConfHelper {
 			this.message = message;
 		}
 
-		public ChatMessage(Type type) {
+		protected ChatMessage(Type type) {
 			Validate.isTrue(type != Type.CUSTOM, "Type cannot be custom.");
 
 			this.type = type;
@@ -270,16 +313,16 @@ public abstract class ConfHelper {
 
 			public static Type fromValue(String raw) {
 				switch (raw.toLowerCase()) {
-					case "default":
-					case "def":
-					case "vanilla":
-						return DEFAULT;
-					case "none":
-					case "hide":
-					case "hidden":
-						return HIDDEN;
-					default:
-						return CUSTOM;
+				case "default":
+				case "def":
+				case "vanilla":
+					return DEFAULT;
+				case "none":
+				case "hide":
+				case "hidden":
+					return HIDDEN;
+				default:
+					return CUSTOM;
 				}
 			}
 		}
@@ -322,7 +365,7 @@ public abstract class ConfHelper {
 		public final Sound sound;
 		public final float volume, pitch;
 
-		public SoundHelper(String raw) {
+		protected SoundHelper(String raw) {
 			String[] values = raw.split(", ");
 
 			if (values.length == 1) {
@@ -336,6 +379,37 @@ public abstract class ConfHelper {
 			sound = Sound.valueOf(values[0].toUpperCase());
 			volume = Float.parseFloat(values[1]);
 			pitch = Float.parseFloat(values[2]);
+		}
+	}
+
+	public static class GroupSpecificHelper<T> {
+
+		private final GroupSetting.Type type;
+		private final T def;
+
+		protected GroupSpecificHelper(GroupSetting.Type type, T def) {
+			this.type = type;
+			this.def = def;
+		}
+
+		@SuppressWarnings("unchecked")
+		public T getFor(PlayerCache cache) {			
+			for (Group group : cache.groups) {
+				GroupSetting setting = group.getSetting(type);
+
+				if (setting != null) {
+					Common.Log("&fGroup-specific: Setting: " + type + " &fis: " + setting.getValue());
+					return (T) setting.getValue();
+				}
+			}
+
+			Common.Log("&eDefault:&f Setting: " + type + " &fis: " + def);
+			return def;
+		}
+
+		@Override
+		public String toString() {
+			throw new RuntimeException("call getFor(player)");
 		}
 	}
 

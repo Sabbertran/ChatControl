@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -50,13 +51,16 @@ public class ChatControl extends JavaPlugin {
 	public void onEnable() {
 		try {			
 			instance = this;
+			
+			CompatProvider.setupReflection();			
+			
+			HookManager.loadDependencies();
+			
+			ConfHelper.loadAll();
 
 			for (Player pl : CompatProvider.getAllPlayers())
 				getDataFor(pl);
 			
-			HookManager.loadDependencies();
-			ConfHelper.loadAll();
-
 			chatCeaser = new ChatCeaser();
 			chatCeaser.load();
 			
@@ -166,6 +170,8 @@ public class ChatControl extends JavaPlugin {
 		if (timedMessageTask != null)
 			timedMessageTask.cancel();
 
+		playerData.clear();
+		
 		scheduleTimedMessages();
 		chatCeaser.load();
 	}
@@ -268,10 +274,17 @@ public class ChatControl extends JavaPlugin {
 	// ------------------------ static ------------------------
 
 	public static PlayerCache getDataFor(Player pl) {
-		return getDataFor(pl.getName());
+		PlayerCache cache = getDataFor(pl.getName());
+		cache.assignGroups(pl);
+		
+		return cache;
+	}
+	
+	public static PlayerCache getDataFor(AsyncPlayerPreLoginEvent e) {
+		return getDataFor(e.getName());
 	}
 
-	public static PlayerCache getDataFor(String pl) {		
+	private static PlayerCache getDataFor(String pl) {		
 		PlayerCache cache = playerData.get(pl);
 
 		if (cache == null) {			

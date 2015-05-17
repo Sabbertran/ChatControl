@@ -41,9 +41,11 @@ public class ChatListener implements Listener {
 		}
 
 		long now = System.currentTimeMillis() / 1000L;
-		if (now - plData.lastMessageTime < Settings.AntiSpam.Messages.DELAY)
+		int messageDelay = Settings.AntiSpam.Messages.DELAY.getFor(plData);
+		
+		if (now - plData.lastMessageTime < messageDelay)
 			if (!Common.hasPerm(pl, Permissions.Bypasses.DELAY_CHAT)) {
-				long time = Settings.AntiSpam.Messages.DELAY - (now - plData.lastMessageTime);
+				long time = messageDelay - (now - plData.lastMessageTime);
 
 				Common.tell(pl, Localization.CHAT_WAIT_MESSAGE.replace("%time", String.valueOf(time)).replace("%seconds", Localization.Parts.SECONDS.formatNumbers(time)));
 				e.setCancelled(true);

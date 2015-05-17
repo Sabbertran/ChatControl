@@ -44,16 +44,17 @@ public class CommandListener implements Listener {
 			}
 		}
 
-		long now = System.currentTimeMillis() / 1000L;
-
-		timeCheck: if (now - plData.lastCommandTime < Settings.AntiSpam.Commands.DELAY) {
+		long now = System.currentTimeMillis() / 1000L;		
+		int commandDelay = Settings.AntiSpam.Commands.DELAY.getFor(plData);
+		
+		timeCheck: if (now - plData.lastCommandTime < commandDelay) {
 			if (Common.hasPerm(pl, Permissions.Bypasses.DELAY_COMMANDS))
 				break timeCheck;
 
 			if (Settings.AntiSpam.Commands.WHITELIST_DELAY.contains(args[0].replaceFirst("/", "")))
 				break timeCheck;
 
-			long time = Settings.AntiSpam.Commands.DELAY - (now - plData.lastCommandTime);
+			long time = commandDelay - (now - plData.lastCommandTime);
 
 			Common.tell(pl, Localization.COMMAND_WAIT_MESSAGE.replace("%time", String.valueOf(time)).replace("%seconds", Localization.Parts.SECONDS.formatNumbers(time)));
 			e.setCancelled(true);

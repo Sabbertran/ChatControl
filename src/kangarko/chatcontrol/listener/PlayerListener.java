@@ -26,7 +26,7 @@ public class PlayerListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
 	public void onPreLogin(AsyncPlayerPreLoginEvent e) {
-		PlayerCache plData = ChatControl.getDataFor(e.getName());
+		PlayerCache plData = ChatControl.getDataFor(e);
 		long difference = (System.currentTimeMillis() / 1000L) - plData.lastLogin;
 		
 		if (plData.lastLogin > 0 && difference < Settings.AntiBot.REJOIN_TIME) {

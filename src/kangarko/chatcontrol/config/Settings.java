@@ -1,11 +1,15 @@
 package kangarko.chatcontrol.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 import kangarko.chatcontrol.config.ConfHelper.ChatMessage.Type;
+import kangarko.chatcontrol.group.Group;
+import kangarko.chatcontrol.group.GroupManager;
+import kangarko.chatcontrol.group.GroupSetting;
 import kangarko.chatcontrol.utils.Common;
 
 @SuppressWarnings("unused")
@@ -13,28 +17,28 @@ public class Settings extends ConfHelper {
 
 	private Settings() {
 	}
-	
+
 	protected static void load() throws Exception {
 		createFileAndLoad("settings.yml", Settings.class);
 	}
 
 	public static class Packets {
-		
+
 		public static boolean ENABLED;
-		
+
 		private static void init() {
 			pathPrefix("Packets");
-			
+
 			ENABLED = getBoolean("Enabled", true);
 		}
-		
+
 		public static class TabComplete {
 			public static boolean DISABLE, DISABLE_ONLY_IN_CMDS, ALLOW_IF_SPACE;
 			public static int IGNORE_ABOVE_LENGTH;
 
 			private static void init() {
 				pathPrefix("Packets.Tab_Complete");
-				
+
 				DISABLE = getBoolean("Disable", true);
 				DISABLE_ONLY_IN_CMDS = getBoolean("Disable_Only_In_Commands", true);
 				ALLOW_IF_SPACE = getBoolean("Allow_When_Message_Has_Space", true);
@@ -63,13 +67,13 @@ public class Settings extends ConfHelper {
 
 	public static class AntiSpam {
 		public static class Messages {
-			public static int DELAY;
+			public static GroupSpecificHelper<Integer> DELAY;
 			public static int SIMILARITY;
 
 			private static void init() {
 				pathPrefix("Anti_Spam.Chat");
 
-				DELAY = getInteger("Delay_Between_Messages", 1);
+				DELAY = new GroupSpecificHelper<Integer>(GroupSetting.Type.MESSAGE_DELAY, getInteger("Delay_Between_Messages", 1));
 				SIMILARITY = getInteger("Similar_Percentage_Block", 80);
 			}
 		}
@@ -78,13 +82,13 @@ public class Settings extends ConfHelper {
 			public static HashSet<String> WHITELIST_DELAY;
 			public static HashSet<String> WHITELIST_SIMILARITY;
 
-			public static int DELAY;
+			public static GroupSpecificHelper<Integer> DELAY;
 			public static int SIMILARITY;
 
 			private static void init() {
 				pathPrefix("Anti_Spam.Commands");
 
-				DELAY = getInteger("Delay_Between_Commands", 2);
+				DELAY = new GroupSpecificHelper<Integer>(GroupSetting.Type.COMMAND_DELAY, getInteger("Delay_Between_Commands", 2));
 				SIMILARITY = getInteger("Similar_Percentage_Block", 80);
 				WHITELIST_DELAY = new HashSet<>(getStringList("Whitelist_Delay", Arrays.asList("spawn", "home")));
 				WHITELIST_SIMILARITY = new HashSet<>(getStringList("Whitelist_Similarity", Arrays.asList("tell", "pm", "t", "w", "r")));
@@ -155,7 +159,7 @@ public class Settings extends ConfHelper {
 		public static ChatMessage JOIN, QUIT, KICK;
 
 		public static boolean QUIT_ONLY_WHEN_LOGGED;
-		
+
 		public static boolean TIMED_ENABLED;
 		public static boolean TIMED_RANDOM_ORDER;
 		public static boolean TIMED_RANDOM_NO_REPEAT;
@@ -173,7 +177,7 @@ public class Settings extends ConfHelper {
 			KICK = getMessage("Kick", new ChatMessage(Type.DEFAULT));
 
 			QUIT_ONLY_WHEN_LOGGED = getBoolean("Show_Quit_Only_When_Logged", true);
-			
+
 			pathPrefix("Messages.Timed");
 
 			TIMED_ENABLED = getBoolean("Enabled", false);
@@ -201,18 +205,18 @@ public class Settings extends ConfHelper {
 					continue;
 
 				String firstArgument = worldMessages.get(0);
-				
+
 				if (firstArgument.startsWith("includeFrom ")) {
 					worldMessages.remove(0);
-					
+
 					List<String> worldToInclude = TIMED.get(firstArgument.replace("includeFrom ", ""));
-					
+
 					if (worldToInclude == null || worldToInclude.size() == 0)
 						Common.Warn("Cannot include messages from " + firstArgument.replace("includeFrom ", " ") + " as the world does not exist or is empty");
-					
+
 					worldMessages.addAll(worldToInclude);
 				}
-				
+
 				if (firstArgument.equalsIgnoreCase("excludeGlobal")) {
 					worldMessages.remove(0);
 					continue;
@@ -325,6 +329,27 @@ public class Settings extends ConfHelper {
 
 			FILTER_ENABLED = getBoolean("Filter.Enabled", true);
 			FILTER_MESSAGES = getStringList("Filter.Filter_Console_Messages", Arrays.asList("Reached end of stream for", "Connection reset", "lost connection"));
+		}
+	}
+
+	public static class Groups {
+		public static boolean ENABLED;
+		public static List<Group> LOADED_GROUPS;
+
+		private static final void init() {
+			ENABLED = getBoolean("Groups.Enabled", false);
+			
+			//  group name, settings (example: message-delay, 4)
+			List<Group> defaults = Arrays.asList(
+					new Group("trusted", 
+							new GroupSetting(GroupSetting.Type.MESSAGE_DELAY, 0), new GroupSetting(GroupSetting.Type.COMMAND_DELAY, 1)
+							),
+					new Group("guest", 
+							new GroupSetting(GroupSetting.Type.MESSAGE_DELAY, 4), new GroupSetting(GroupSetting.Type.COMMAND_DELAY, 6)
+							)
+					);
+
+			LOADED_GROUPS = getGroups("Groups", defaults);
 		}
 	}
 

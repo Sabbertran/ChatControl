@@ -14,20 +14,8 @@ public class CompatProvider {
 
 	private CompatProvider() {
 	}
-	
-	public static Collection<? extends Player> getAllPlayers() {
-		return isGetPlayersCollection ? Bukkit.getOnlinePlayers() : Arrays.asList(getPlayersLegacy());
-	}
 
-	private static Player[] getPlayersLegacy() {
-		try {
-			return (Player[]) getPlayersMethod.invoke(null);
-		} catch (ReflectiveOperationException ex) {
-			throw new RuntimeException("Reflection malfunction", ex);
-		}
-	}
-
-	static {
+	public static void setupReflection() {
 		try {
 			Class.forName("org.bukkit.Sound"); // test for too old craftbukkits
 			getPlayersMethod = Bukkit.class.getMethod("getOnlinePlayers");
@@ -40,5 +28,17 @@ public class CompatProvider {
 		}
 
 		Common.Debug("&7[Reflection] &bUsing " + (isGetPlayersCollection ? "&anew" : "&cold") + " &bgetter for players");
+	}
+	
+	public static Collection<? extends Player> getAllPlayers() {
+		return isGetPlayersCollection ? Bukkit.getOnlinePlayers() : Arrays.asList(getPlayersLegacy());
+	}
+	
+	private static Player[] getPlayersLegacy() {
+		try {
+			return (Player[]) getPlayersMethod.invoke(null);
+		} catch (ReflectiveOperationException ex) {
+			throw new RuntimeException("Reflection malfunction", ex);
+		}
 	}
 }

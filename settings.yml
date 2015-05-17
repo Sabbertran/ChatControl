@@ -276,6 +276,18 @@ Sound_Notify:
   - w
   - r
 
+# Overrides some settings above.
+# There are currently only two settings.
+Groups:
+  Enabled: false
+  # Example usage. Give the player chatcontrol.group.trusted to make it working. 
+  # As you can see, if you do not specify the value, the default will be used.
+  trusted:
+    Message_Delay: 0
+  guest:
+    Message_Delay: 4
+    Command_Delay: 6
+
 Updater:
   Enabled: true
   Notify: true
