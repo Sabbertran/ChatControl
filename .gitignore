@@ -17,6 +17,7 @@ local.properties
 .loadpath
 .project
 .classpath
+src/unused
 
 # External tool builders
 .externalToolBuilders/

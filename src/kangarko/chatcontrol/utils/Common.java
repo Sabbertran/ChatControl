@@ -24,13 +24,13 @@ import kangarko.chatcontrol.config.Settings;
 public class Common {
 
 	private static final ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-	
+
 	private static final DecimalFormat digitsFormat = new DecimalFormat("#.###");
 	private static final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-	
+
 	private Common() {
 	}
-	
+
 	private static String INTERNAL_PREFIX = "";
 	public static void addLoggingPrefix() {
 		INTERNAL_PREFIX = "[ChatControl] ";
@@ -42,7 +42,7 @@ public class Common {
 	public static String getFormattedDate() {
 		return dateFormat.format(System.currentTimeMillis());
 	}
-	
+
 	/**
 	 * #.###
 	 */
@@ -154,23 +154,23 @@ public class Common {
 	public static String colorize(String str) {
 		if (str == null || str.isEmpty())
 			return "";
-		
+
 		return ChatColor.translateAlternateColorCodes('&', setPrefix(str));
 	}
 
 	public static String consoleLine() {
 		return "&6*----------------------------------------------*";
 	}
-	
+
 	public static boolean doesPluginExist(String plugin) {
 		return doesPluginExist(plugin, null);
 	}
-	
+
 	public static boolean doesPluginExist(String plugin, String message) {
 		boolean hooked = Bukkit.getPluginManager().getPlugin(plugin) != null;
 		if (hooked)
 			Common.Log("&3Hooked into&8: &f" + plugin + (message != null ? "(" + message + ")" : ""));
-		
+
 		return hooked;
 	}
 
@@ -218,10 +218,12 @@ public class Common {
 
 	// -------------------------------------------------------------------
 
-	public static void Log(String str) {
-		console.sendMessage(colorize(INTERNAL_PREFIX + str.replace("\n", "\n&r")));
+	public static void Log(String... messages) {
+		for (String message : messages)
+			for (String part : message.split("\n"))
+				console.sendMessage(colorize(INTERNAL_PREFIX + part.replace("\n", "\n&r")));
 	}
-	
+
 	public static void LogFromParser(String str) {
 		console.sendMessage(colorize(str
 				.replace("{", "&6{&7")

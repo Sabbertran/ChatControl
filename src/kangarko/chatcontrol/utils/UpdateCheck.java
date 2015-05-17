@@ -23,10 +23,15 @@ public class UpdateCheck implements Runnable {
 	public static boolean needsUpdate = false;
 	public static String newVersion;
 
-	private String fileurl;
-
-	public UpdateCheck(String fileurl) {
-		this.fileurl = fileurl;
+	// A file with version info
+	private final String versionInfoUrl;
+	
+	// A folder with precompiled files.
+	private final String filesFolderUrl;
+	
+	public UpdateCheck() {
+		this.versionInfoUrl = "https://raw.github.com/kangarko/ChatControl/master/plugin.yml";
+		this.filesFolderUrl = "https://raw.githubusercontent.com/kangarko/ChatControl/master/precompiled/";
 	}
 
 	@SuppressWarnings("deprecation")
@@ -37,17 +42,16 @@ public class UpdateCheck implements Runnable {
 		if (oldversion.contains("SNAPSHOT") || oldversion.contains("DEV"))
 			return;
 
-		String newversion = oldversion;
-
 		try {
 			YamlConfiguration conf;
-			InputStream is = new URL(fileurl).openConnection().getInputStream();
+			InputStream is = new URL(versionInfoUrl).openConnection().getInputStream();
 			try {
 				conf = YamlConfiguration.loadConfiguration(new InputStreamReader(is));
 			} catch (NoSuchMethodError ex) {
 				conf = YamlConfiguration.loadConfiguration(is);
 			}
-			newversion = conf.getString("version");
+			
+			String newversion = conf.getString("version");
 
 			if (newversion.contains("SNAPSHOT") || newversion.contains("DEV"))
 				return;
@@ -59,7 +63,7 @@ public class UpdateCheck implements Runnable {
 					try {
 						Common.Log("&bChatControl is updating! Downloading v" + newversion);
 
-						adresa = new URL("https://raw.githubusercontent.com/kangarko/ChatControl/master/precompiled/ChatControl_v" + newversion + ".jar");
+						adresa = new URL(filesFolderUrl + "ChatControl_v" + newversion + ".jar");
 
 						Common.Log("Got file of size: " + (double) adresa.openConnection().getContentLengthLong() / 1000 + " kb");
 
@@ -70,7 +74,7 @@ public class UpdateCheck implements Runnable {
 
 						Files.copy(adresa.openStream(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-						Common.Log("Downloaded! File uploaded into the " + Bukkit.getUpdateFolder() + " folder. Please copy it to plugins folder.");
+						Common.Log("Downloaded! File uploaded into the " + Bukkit.getUpdateFolder() + " folder. Please copy it to the plugins folder.");
 					} catch (FileNotFoundException ex) {
 						Common.Warn("Cannot download file from " + adresa.toString() + " (Malformed URL / file not uploaded yet)");
 					} catch (IOException ex) {
@@ -81,13 +85,11 @@ public class UpdateCheck implements Runnable {
 					needsUpdate = true;
 					newVersion = newversion;
 
-					String[] msgs = Localization.UPDATE_AVAILABLE.replace("%current", oldversion).replace("%new", newversion).split("\n");
-					for (String part : msgs)
-						Common.Log(part);
+					Common.Log(Localization.UPDATE_AVAILABLE.replace("%current", oldversion).replace("%new", newversion));
 				}
 
 		} catch (UnknownHostException | MalformedURLException ex) {
-			Common.Warn("Update check failed, could not connect to: " + fileurl);
+			Common.Warn("Update check failed, could not connect to: " + versionInfoUrl);
 
 			if (Settings.DEBUG)
 				ex.printStackTrace();
@@ -97,7 +99,7 @@ public class UpdateCheck implements Runnable {
 			if (ex.getMessage().equals("Permission denied: connect"))
 				Common.Warn("Unable to connect to the update site, check your internet/firewall.");
 			else
-				Common.Error("Error while checking for update from: " + fileurl, ex);
+				Common.Error("Error while checking for update from: " + versionInfoUrl, ex);
 		}
 	}
 

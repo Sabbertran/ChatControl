@@ -16,12 +16,12 @@ public class CompatProvider {
 	}
 	
 	public static Collection<? extends Player> getAllPlayers() {
-		return isGetPlayersCollection ? Bukkit.getOnlinePlayers() : Arrays.asList( (Player[]) getRawPlayers());
+		return isGetPlayersCollection ? Bukkit.getOnlinePlayers() : Arrays.asList(getPlayersLegacy());
 	}
 
-	private static Object getRawPlayers() {
+	private static Player[] getPlayersLegacy() {
 		try {
-			return getPlayersMethod.invoke(null);
+			return (Player[]) getPlayersMethod.invoke(null);
 		} catch (ReflectiveOperationException ex) {
 			throw new RuntimeException("Reflection malfunction", ex);
 		}
@@ -33,7 +33,7 @@ public class CompatProvider {
 			getPlayersMethod = Bukkit.class.getMethod("getOnlinePlayers");
 
 			if (getPlayersMethod.getReturnType() == Collection.class)
-				isGetPlayersCollection = true;			
+				isGetPlayersCollection = true;
 
 		} catch (ReflectiveOperationException ex) {
 			throw new UnsupportedOperationException();

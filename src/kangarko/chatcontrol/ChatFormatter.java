@@ -58,53 +58,32 @@ public class ChatFormatter implements Listener {
 			e.getRecipients().clear();
 			e.getRecipients().addAll(getLocalRecipients(pl, msg, Settings.Chat.Formatter.RANGE));
 		}
-
-		// experiment start
-		/*System.out.println("PREFIX: " + ChatControl.instance().vault.getPlayerPrefix(pl));
-
-		String vault_prefix = ChatControl.instance().vault.getPlayerPrefix(pl);
-		String vault_suffix = ChatControl.instance().vault.getPlayerSuffix(pl);
-
-		for (Player online : e.getRecipients()) {
-			new Experimental.JsonBuilder(/*msgFormat.replace("%1$s", "").replace("%2$s", msg))
-			.add(vault_prefix)
-			.setHoverAction(HoverAction.SHOW_TEXT, " &7An Operator is the highest rank, \n &7which manages things around \n &7the server and its players. ")
-
-			.add(Common.lastColor(vault_prefix) + pl.getName())
-			.setHoverAction(HoverAction.SHOW_TEXT, "&7Message Issued: &b" + Common.getFormattedDate() + "\n&7Click to send a PM.")
-			.setClickAction(ClickAction.SUGGEST_COMMAND, "/tell " + pl.getName() + " ")
-
-			.add("&7: " + vault_suffix + msg)
-			.send(online);
-		}
-
-		e.getRecipients().clear();*/
-		// experiment end
 	}
 
-	private String replaceAllVariables(Player pl, String format) {
-		format = formatColor(format);
-		format = replacePlayerVariables(pl, format);
-		format = replaceTime(format);
+	private String replaceAllVariables(Player pl, String msg) {
+		msg = formatColor(msg);
+		msg = replacePlayerVariables(pl, msg);
+		msg = replaceTime(msg);
 
-		return format;
+		return msg;
 	}
 
-	public String replacePlayerVariables(Player pl, String format) {
-		String world = pl.getWorld().getName();
-		
-		format = format.replace("%countrycode", HookManager.getCountryCode(pl))
-					   .replace("%countryname", HookManager.getCountryName(pl));
+	public String replacePlayerVariables(Player pl, String msg) {
+		msg = msg.replace("%countrycode", HookManager.getCountryCode(pl))
+				.replace("%countryname", HookManager.getCountryName(pl))
 
-		return format
 				.replace("%pl_prefix", formatColor(HookManager.getPlayerPrefix(pl)))
 				.replace("%pl_suffix", formatColor(HookManager.getPlayerSuffix(pl)))
-				.replace("%world", HookManager.getWorldAlias(world))
-				.replace("%health", formatHealth(pl) + ChatColor.RESET)
+
 				.replace("%player", pl.getName())
+				.replace("%world", HookManager.getWorldAlias(pl.getWorld().getName()))
+				.replace("%health", formatHealth(pl) + ChatColor.RESET)
+
 				.replace("%town", HookManager.getTownName(pl))
 				.replace("%nation", HookManager.getNation(pl))
 				.replace("%clan", HookManager.getClanTag(pl));
+
+		return msg;
 	}
 
 	private String replaceTime(String msg) {
@@ -137,76 +116,73 @@ public class ChatFormatter implements Listener {
 		return msg;
 	}
 
-	private String formatColor(String string) {
-		return Common.colorize(string);
+	private String formatColor(String msg) {
+		return Common.colorize(msg);
 	}
 
-	private String formatColor(String string, Player pl) {
-		if (string == null)
+	private String formatColor(String msg, Player pl) {
+		if (msg == null)
 			return "";
 
-		String str = string;
 		if (Common.hasPerm(pl, Permissions.Formatter.COLOR))
-			str = COLOR_REGEX.matcher(str).replaceAll("\u00A7$1");
+			msg = COLOR_REGEX.matcher(msg).replaceAll("\u00A7$1");
 
 		if (Common.hasPerm(pl, Permissions.Formatter.MAGIC))
-			str = MAGIC_REGEN.matcher(str).replaceAll("\u00A7$1");
+			msg = MAGIC_REGEN.matcher(msg).replaceAll("\u00A7$1");
 
 		if (Common.hasPerm(pl, Permissions.Formatter.BOLD))
-			str = BOLD_REGEX.matcher(str).replaceAll("\u00A7$1");
+			msg = BOLD_REGEX.matcher(msg).replaceAll("\u00A7$1");
 
 		if (Common.hasPerm(pl, Permissions.Formatter.STRIKETHROUGH))
-			str = STRIKETHROUGH_REGEX.matcher(str).replaceAll("\u00A7$1");
+			msg = STRIKETHROUGH_REGEX.matcher(msg).replaceAll("\u00A7$1");
 
 		if (Common.hasPerm(pl, Permissions.Formatter.UNDERLINE))
-			str = UNDERLINE_REGEX.matcher(str).replaceAll("\u00A7$1");
+			msg = UNDERLINE_REGEX.matcher(msg).replaceAll("\u00A7$1");
 
 		if (Common.hasPerm(pl, Permissions.Formatter.ITALIC))
-			str = ITALIC_REGEX.matcher(str).replaceAll("\u00A7$1");
+			msg = ITALIC_REGEX.matcher(msg).replaceAll("\u00A7$1");
 
-		str = RESET_REGEX.matcher(str).replaceAll("\u00A7$1");
-		return str;
+		msg = RESET_REGEX.matcher(msg).replaceAll("\u00A7$1");
+
+		return msg;
 	}
 
 	private String formatHealth(Player pl) {
 		int health = (int) pl.getHealth();
 
-		if (health > 10)
-			return ChatColor.DARK_GREEN + "" + health;
-		if (health > 5)
-			return ChatColor.GOLD + "" + health;
-		return ChatColor.RED + "" + health;
+		return (health > 10 ? ChatColor.DARK_GREEN : health > 5 ? ChatColor.GOLD : ChatColor.RED) + "" + health;
 	}
 
-	private List<Player> getLocalRecipients(Player sender, String message, double range) {
+	private List<Player> getLocalRecipients(Player pl, String msg, double range) {
 		List<Player> recipients = new LinkedList<Player>();
+
 		try {
-			Location playerLocation = sender.getLocation();
+			Location playerLocation = pl.getLocation();
 			double squaredDistance = Math.pow(range, 2.0D);
 
 			for (Player receiver : CompatProvider.getAllPlayers()) {
-				if (receiver.getWorld().getName().equals(sender.getWorld().getName()))
-					if (Common.hasPerm(sender, Permissions.Formatter.OVERRIDE_RANGED_WORLD) || playerLocation.distanceSquared(receiver.getLocation()) <= squaredDistance) {
+				if (receiver.getWorld().getName().equals(pl.getWorld().getName()))
+					if (Common.hasPerm(pl, Permissions.Formatter.OVERRIDE_RANGED_WORLD) || playerLocation.distanceSquared(receiver.getLocation()) <= squaredDistance) {
 						recipients.add(receiver);
 						continue;
 					}
-				
+
 				if (Common.hasPerm(receiver, Permissions.Formatter.SPY))
-					Common.tell(receiver, replaceAllVariables(sender, Settings.Chat.Formatter.SPY_FORMAT.replace("%message", message).replace("%displayname", sender.getDisplayName())));
+					Common.tell(receiver, replaceAllVariables(pl, Settings.Chat.Formatter.SPY_FORMAT.replace("%message", msg).replace("%displayname", pl.getDisplayName())));
 			}
 
 			return recipients;
 		} catch (ArrayIndexOutOfBoundsException ex) {
 			Common.Log("(Range Chat) Got " + ex.getMessage() + ", trying (limited) backup.");
-			Writer.Write(Writer.ERROR_PATH, "Range Chat", sender.getName() + ": \'" + message + "\' Resulted in error: " + ex.getMessage());
+			Writer.Write(Writer.ERROR_PATH, "Range Chat", pl.getName() + ": \'" + msg + "\' Resulted in error: " + ex.getMessage());
 
-			if (Common.hasPerm(sender, Permissions.Formatter.OVERRIDE_RANGED_WORLD)) {
+			if (Common.hasPerm(pl, Permissions.Formatter.OVERRIDE_RANGED_WORLD)) {
 				for (Player recipient : CompatProvider.getAllPlayers())
-					if (recipient.getWorld().equals(sender.getWorld()))
+					if (recipient.getWorld().equals(pl.getWorld()))
 						recipients.add(recipient);
 
 			} else {
-				for (Entity en : sender.getNearbyEntities(range, range, range))
+				for (Entity en : pl.getNearbyEntities(range, range, range))
 					if (en.getType() == EntityType.PLAYER)
 						recipients.add((Player) en);
 			}
@@ -215,105 +191,3 @@ public class ChatFormatter implements Listener {
 		return recipients;
 	}
 }
-
-/*class Experimental {
-
-	enum ClickAction {
-		RUN_COMMAND,
-		SUGGEST_COMMAND;
-	}
-
-	enum HoverAction {
-		SHOW_TEXT,
-	}
-
-	@SuppressWarnings("unchecked")
-	public static class JsonBuilder {
-
-		private JSONObject json = new JSONObject();
-
-		public JsonBuilder() {
-			this("");
-		}
-
-		public JsonBuilder(String message) {
-			JSONArray array = new JSONArray();
-			JSONObject extra = new JSONObject();
-
-			extra.put("text", message);
-			array.add(extra);
-
-			json.put("extra", array);
-			json.put("text", "");
-		}
-
-		public JsonBuilder add(String message) {
-			JSONObject extra = new JSONObject();
-
-			extra.put("text", message);
-
-			putNewMapping(extra);
-
-			return this;
-		}
-
-		public JsonBuilder setClickAction(ClickAction action, String value) {
-			JSONObject event = new JSONObject();
-
-			event.put("action", action.toString().toLowerCase());
-			event.put("value", value);
-
-			insertToLastMapping("clickEvent", event);
-
-			return this;
-		}
-
-		public JsonBuilder setHoverAction(HoverAction action, String value) {
-			JSONObject event = new JSONObject();
-
-			event.put("action", action.toString().toLowerCase());
-			event.put("value", value);
-
-			insertToLastMapping("hoverEvent", event);
-
-			return this;
-		}
-
-		// ------------- Helpers
-
-		private void insertToLastMapping(String key, Object obj) {
-			JSONArray array = (JSONArray) json.get("extra");
-			JSONObject last = (JSONObject) array.get(array.size() - 1);
-
-			last.put(key, obj);
-			json.put("extra", array);
-		}
-
-		private void putNewMapping(Object obj) {
-			JSONArray array = (JSONArray) json.get("extra");
-
-			array.add(obj);
-			json.put("extra", array);
-		}
-
-		// ------------- Final methods
-
-		public String toJSONString() {
-			return json.toJSONString();
-		}
-
-		public void send(Player badass) {
-			try {
-				System.out.println("Sending: " + json.toJSONString());
-
-				IChatBaseComponent comp = ChatSerializer.a( Common.colorize(json.toJSONString()) );
-				PacketPlayOutChat packet = new PacketPlayOutChat(comp);
-
-				((CraftPlayer) badass).getHandle().playerConnection.sendPacket(packet);
-			} catch (Exception ex) {
-				Common.tell(badass, "&cSeems like an error occured, hahaha");
-				ex.printStackTrace();
-			}
-		}
-	}
-}*/

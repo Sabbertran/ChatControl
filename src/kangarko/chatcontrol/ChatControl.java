@@ -99,7 +99,7 @@ public class ChatControl extends JavaPlugin {
 			getCommand("chatcontrol").setExecutor(new CommandsHandler());
 
 			if (Settings.Updater.ENABLED)
-				getServer().getScheduler().runTaskAsynchronously(this, new UpdateCheck("https://raw.github.com/kangarko/ChatControl/master/plugin.yml"));
+				getServer().getScheduler().runTaskAsynchronously(this, new UpdateCheck());
 
 			Common.addLoggingPrefix();
 
