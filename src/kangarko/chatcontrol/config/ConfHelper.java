@@ -240,6 +240,9 @@ public abstract class ConfHelper {
 		List<Group> groups = new ArrayList<>();
 
 		for (String groupName : cfg.getConfigurationSection(path).getKeys(false)) {
+			if (groupName.equals("Enabled"))
+				continue;
+			
 			// type, value (UNPARSED)
 			HashMap<String, Object> settingsRaw = getValuesAndKeys(path + "." + groupName, null, false);
 
@@ -394,16 +397,16 @@ public abstract class ConfHelper {
 
 		@SuppressWarnings("unchecked")
 		public T getFor(PlayerCache cache) {			
+			if (!Settings.Groups.ENABLED)
+				return def;
+				
 			for (Group group : cache.groups) {
 				GroupSetting setting = group.getSetting(type);
 
-				if (setting != null) {
-					Common.Log("&fGroup-specific: Setting: " + type + " &fis: " + setting.getValue());
+				if (setting != null)
 					return (T) setting.getValue();
-				}
 			}
 
-			Common.Log("&eDefault:&f Setting: " + type + " &fis: " + def);
 			return def;
 		}
 

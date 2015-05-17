@@ -333,12 +333,10 @@ public class Settings extends ConfHelper {
 	}
 
 	public static class Groups {
-		public static boolean ENABLED;
 		public static List<Group> LOADED_GROUPS;
-
-		private static final void init() {
-			ENABLED = getBoolean("Groups.Enabled", false);
-			
+		public static boolean ENABLED;
+		
+		private static final void init() {			
 			//  group name, settings (example: message-delay, 4)
 			List<Group> defaults = Arrays.asList(
 					new Group("trusted", 
@@ -350,6 +348,8 @@ public class Settings extends ConfHelper {
 					);
 
 			LOADED_GROUPS = getGroups("Groups", defaults);
+			
+			ENABLED = getBoolean("Groups.Enabled", false);
 		}
 	}
 
