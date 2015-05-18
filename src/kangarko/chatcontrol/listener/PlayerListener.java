@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.PlayerCache;
+import kangarko.chatcontrol.config.ConfHelper.ChatMessage;
 import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
 import kangarko.chatcontrol.hooks.HookManager;
@@ -71,12 +72,14 @@ public class PlayerListener implements Listener {
 			return;
 		}
 
-		switch (Settings.Messages.JOIN.getType()) {
+		ChatMessage joinMessage = Settings.Messages.JOIN.getFor(plData);
+		
+		switch (joinMessage.getType()) {
 			case HIDDEN:
 				e.setJoinMessage(null);
 				break;
 			case CUSTOM:
-				e.setJoinMessage(replacePlayerVariables(Settings.Messages.JOIN.getMessage(), e.getPlayer()));
+				e.setJoinMessage(replacePlayerVariables(joinMessage.getMessage(), e.getPlayer()));
 				break;
 			default:
 				break;
@@ -94,13 +97,16 @@ public class PlayerListener implements Listener {
 			e.setQuitMessage(null);
 			return;
 		}
-
-		switch (Settings.Messages.QUIT.getType()) {
+		
+		PlayerCache plData = ChatControl.getDataFor(e.getPlayer());
+		ChatMessage leaveMessage = Settings.Messages.QUIT.getFor(plData);
+		
+		switch (leaveMessage.getType()) {
 			case HIDDEN:
 				e.setQuitMessage(null);
 				break;
 			case CUSTOM:
-				e.setQuitMessage(replacePlayerVariables(Settings.Messages.QUIT.getMessage(), e.getPlayer()));
+				e.setQuitMessage(replacePlayerVariables(leaveMessage.getMessage(), e.getPlayer()));
 				break;
 			default:
 				break;
@@ -114,12 +120,15 @@ public class PlayerListener implements Listener {
 			return;
 		}
 
-		switch (Settings.Messages.KICK.getType()) {
+		PlayerCache plData = ChatControl.getDataFor(e.getPlayer());
+		ChatMessage kickMessage = Settings.Messages.KICK.getFor(plData);
+		
+		switch (kickMessage.getType()) {
 			case HIDDEN:
 				e.setLeaveMessage(null);
 				break;
 			case CUSTOM:
-				e.setLeaveMessage(replacePlayerVariables(Settings.Messages.KICK.getMessage(), e.getPlayer()));
+				e.setLeaveMessage(replacePlayerVariables(kickMessage.getMessage(), e.getPlayer()));
 				break;
 			default:
 				break;
@@ -176,7 +185,7 @@ public class PlayerListener implements Listener {
 		LagCatcher.end("Sign event");
 	}
 
-	public String replacePlayerVariables(String msg, Player pl) {
+	private String replacePlayerVariables(String msg, Player pl) {
 		msg = msg.replace("%player", pl.getName());
 
 		if (ChatControl.instance().formatter != null)

@@ -234,9 +234,11 @@ public abstract class ConfHelper {
 				String groupPath = path + "." + group.getName();
 
 				if (!cfg.isSet(groupPath))
-					for (GroupOption setting : group.getSettings())
-						addDefault(groupPath + "." + setting.getOption(), setting.getValue());
-			}
+					for (GroupOption setting : group.getSettings()) {
+						Object val = setting.getValue();
+						addDefault(groupPath + "." + setting.getOption(), val instanceof ChatMessage ? ((ChatMessage)val).getMessage() : val);
+					}
+				}
 
 			try {
 				save();
@@ -302,6 +304,9 @@ public abstract class ConfHelper {
 		private final String message;
 
 		public ChatMessage(String message) {
+			if (message.startsWith("kangarko"))
+				Thread.dumpStack();
+			
 			type = Type.fromValue(message);
 			this.message = message;
 		}
@@ -317,7 +322,7 @@ public abstract class ConfHelper {
 			return type;
 		}
 
-		public String getMessage() {
+		public String getMessage() {			
 			Objects.requireNonNull(message, "Message cannot be null!");
 			return message;
 		}
@@ -345,8 +350,8 @@ public abstract class ConfHelper {
 	}
 
 	public static class CasusHelper {
-		private final String nominativPl; // 2 to 4 seconds (slovak case - sekundy)
 		private final String akuzativSg; // 1 second (slovak case - sekundu) - not in english
+		private final String nominativPl; // 2 to 4 seconds (slovak case - sekundy)
 		private final String genitivePl; // 5 and more seconds (slovak case - sekund)
 
 		protected CasusHelper(String raw) {
@@ -406,6 +411,10 @@ public abstract class ConfHelper {
 		protected GroupSpecificHelper(GroupOption.Option type, T def) {
 			this.type = type;
 			this.def = def;
+		}
+		
+		public T getDefault() {
+			return def;
 		}
 
 		@SuppressWarnings("unchecked")

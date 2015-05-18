@@ -159,7 +159,7 @@ public class Settings extends ConfHelper {
 	}
 
 	public static class Messages {
-		public static ChatMessage JOIN, QUIT, KICK;
+		public static GroupSpecificHelper<ChatMessage> JOIN, QUIT, KICK;
 
 		public static boolean QUIT_ONLY_WHEN_LOGGED;
 
@@ -175,9 +175,9 @@ public class Settings extends ConfHelper {
 		private static void init() {
 			pathPrefix("Messages");
 
-			JOIN = getMessage("Join", new ChatMessage(Type.DEFAULT));
-			QUIT = getMessage("Quit", new ChatMessage(Type.DEFAULT));
-			KICK = getMessage("Kick", new ChatMessage(Type.DEFAULT));
+			JOIN = new GroupSpecificHelper<ChatMessage>(GroupOption.Option.JOIN_MESSAGE, getMessage("Join", new ChatMessage(Type.DEFAULT)));
+			QUIT = new GroupSpecificHelper<ChatMessage>(GroupOption.Option.LEAVE_MESSAGE, getMessage("Quit", new ChatMessage(Type.DEFAULT)));
+			KICK = new GroupSpecificHelper<ChatMessage>(GroupOption.Option.KICK_MESSAGE, getMessage("Kick", new ChatMessage(Type.DEFAULT)));
 
 			QUIT_ONLY_WHEN_LOGGED = getBoolean("Show_Quit_Only_When_Logged", true);
 
@@ -348,11 +348,16 @@ public class Settings extends ConfHelper {
 			//  group name, settings (example: message-delay, 4)
 			List<Group> defaults = Arrays.asList(
 					new Group("trusted", 
-							Option.MESSAGE_DELAY.create(0), Option.COMMAND_DELAY.create(1)
+							Option.MESSAGE_DELAY.create(0)
 							),
-							new Group("guest", 
-									Option.MESSAGE_DELAY.create(4), Option.COMMAND_DELAY.create(6)
-									)
+					new Group("guest", 
+							Option.MESSAGE_DELAY.create(4), Option.COMMAND_DELAY.create(6)
+							),
+					new Group("vip", 
+							Option.JOIN_MESSAGE.create(new ChatMessage("&6[VIP] &e%player has joined the game")),
+							Option.LEAVE_MESSAGE.create(new ChatMessage("&6[VIP] &e%player has left the game")),
+							Option.KICK_MESSAGE.create(new ChatMessage(Type.HIDDEN))
+							)
 					);
 
 			LOADED_GROUPS = getGroups("Group_List", defaults);

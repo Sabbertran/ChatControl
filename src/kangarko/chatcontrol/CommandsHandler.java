@@ -12,6 +12,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import kangarko.chatcontrol.config.ConfHelper;
 import kangarko.chatcontrol.config.ConfHelper.ChatMessage;
+import kangarko.chatcontrol.config.ConfHelper.GroupSpecificHelper;
 import kangarko.chatcontrol.config.Localization;
 import kangarko.chatcontrol.config.Settings;
 import kangarko.chatcontrol.hooks.HookManager;
@@ -25,14 +26,14 @@ public class CommandsHandler implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		try {
 			handleCommand(sender, args);
-		
+
 		} catch (MissingPermissionException ex) {
 			Common.tell(sender, ex.getMessage());
-		
+
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
-		
+
 		return true;
 	}
 
@@ -140,35 +141,50 @@ public class CommandsHandler implements CommandExecutor {
 			param = args[1].toLowerCase();
 			String fakePlayer = args.length == 3 ? Common.colorize(args[2]) : sender.getName();
 
+			Player onlineFakePlayer = Bukkit.getPlayer(fakePlayer);
+			PlayerCache fakePlayerData = onlineFakePlayer != null && onlineFakePlayer.isOnline() ? ChatControl.getDataFor(onlineFakePlayer) : null;
+
+			ChatMessage fakeMessage;
+			GroupSpecificHelper<ChatMessage> messageHelper;
+
 			if (param.equals("join") || param.equals("j")) {
-				if (Settings.Messages.JOIN.getType() == ChatMessage.Type.DEFAULT)
+				messageHelper = Settings.Messages.JOIN;				
+				fakeMessage = fakePlayerData != null ? messageHelper.getFor(fakePlayerData) : messageHelper.getDefault();
+
+				if (fakeMessage.getType() == ChatMessage.Type.DEFAULT)
 					Common.broadcast(ChatColor.YELLOW + fakePlayer + ChatColor.YELLOW + " joined the game.");
 
-				else if (Settings.Messages.JOIN.getType() == ChatMessage.Type.HIDDEN)
+				else if (fakeMessage.getType() == ChatMessage.Type.HIDDEN)
 					Common.tell(sender, Localization.CANNOT_BROADCAST_EMPTY_MESSAGE.replace("%event", Localization.Parts.JOIN));
 
 				else
-					Common.broadcastWithPlayer(Settings.Messages.JOIN.getMessage(), fakePlayer);
+					Common.broadcastWithPlayer(replacePlayerVariables(fakeMessage.getMessage(), onlineFakePlayer), fakePlayer);
 
 			} else if (param.equals("quit") || param.equals("q") || param.equals("leave") || param.equals("l")) {
-				if (Settings.Messages.QUIT.getType() == ChatMessage.Type.DEFAULT)
+				messageHelper = Settings.Messages.QUIT;				
+				fakeMessage = fakePlayerData != null ? messageHelper.getFor(fakePlayerData) : messageHelper.getDefault();
+
+				if (fakeMessage.getType() == ChatMessage.Type.DEFAULT)
 					Common.broadcast(ChatColor.YELLOW + fakePlayer + ChatColor.YELLOW + " left the game.");
 
-				else if (Settings.Messages.QUIT.getType() == ChatMessage.Type.HIDDEN)
+				else if (fakeMessage.getType() == ChatMessage.Type.HIDDEN)
 					Common.tell(sender, Localization.CANNOT_BROADCAST_EMPTY_MESSAGE.replace("%event", Localization.Parts.QUIT));
 
 				else
-					Common.broadcastWithPlayer(Settings.Messages.QUIT.getMessage(), fakePlayer);
+					Common.broadcastWithPlayer(replacePlayerVariables(fakeMessage.getMessage(), onlineFakePlayer), fakePlayer);
 
 			} else if (param.equals("kick") || param.equals("k")) {
-				if (Settings.Messages.KICK.getType() == ChatMessage.Type.DEFAULT)
+				messageHelper = Settings.Messages.KICK;				
+				fakeMessage = fakePlayerData != null ? messageHelper.getFor(fakePlayerData) : messageHelper.getDefault();
+
+				if (fakeMessage.getType() == ChatMessage.Type.DEFAULT)
 					Common.broadcast(ChatColor.YELLOW + fakePlayer + ChatColor.YELLOW + " left the game.");
 
-				else if (Settings.Messages.KICK.getType() == ChatMessage.Type.HIDDEN)
+				else if (fakeMessage.getType() == ChatMessage.Type.HIDDEN)
 					Common.tell(sender, Localization.CANNOT_BROADCAST_EMPTY_MESSAGE.replace("%event", Localization.Parts.QUIT));
 
 				else
-					Common.broadcastWithPlayer(Settings.Messages.KICK.getMessage(), fakePlayer);
+					Common.broadcastWithPlayer(replacePlayerVariables(fakeMessage.getMessage(), onlineFakePlayer), fakePlayer);
 
 			} else
 				Common.tell(sender, Localization.USAGE_FAKE_CMD);
@@ -211,7 +227,7 @@ public class CommandsHandler implements CommandExecutor {
 					"  &f/chc fake &6<join/leave> &2[name] &e- Fake join/quit messages.",
 					"  &f/chc reload &e- Reload configuration.",
 					"  &f/chc list &e- Command list.");
-		/*} 
+			/*} 
 
 		else if ("test".equals(argument)) {
 			if (args.length == 1) {
@@ -223,7 +239,7 @@ public class CommandsHandler implements CommandExecutor {
 				try {
 					if (reason.equals("1"))
 						reason = "get -> org.bukkit.Bukkit|getServicesManager()|getRegistration(net.milkbowl.vault.chat.Chat.class)|getProvider()|getPlayerPrefix(\"world\",\"kangarko\")";
-					
+
 					LagCatcher.start("test");
 					Common.tell(sender, "Method returned: " + ProcessingEngine.process(reason, sender));
 					LagCatcher.end("test", 0);
@@ -240,6 +256,16 @@ public class CommandsHandler implements CommandExecutor {
 	private void checkPerm(CommandSender sender, String perm) {
 		if (sender instanceof Player && !Common.hasPerm(sender, perm))
 			throw new MissingPermissionException(perm);
+	}
+
+	public String replacePlayerVariables(String msg, Player pl) {
+		if (pl != null && pl.isOnline()) {
+			msg = msg.replace("%player", pl.getName());
+
+			if (ChatControl.instance().formatter != null)
+				msg = ChatControl.instance().formatter.replacePlayerVariables(pl, msg);
+		}
+		return Common.colorize(msg);
 	}
 }
 

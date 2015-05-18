@@ -3,6 +3,8 @@ package kangarko.chatcontrol.group;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
+import kangarko.chatcontrol.config.ConfHelper.ChatMessage;
+
 public class GroupOption {
 
 	private final Option option;
@@ -23,7 +25,11 @@ public class GroupOption {
 
 	public static enum Option {
 		MESSAGE_DELAY(Integer.class),
-		COMMAND_DELAY(Integer.class);
+		COMMAND_DELAY(Integer.class),
+
+		JOIN_MESSAGE(ChatMessage.class),
+		LEAVE_MESSAGE(ChatMessage.class),
+		KICK_MESSAGE(ChatMessage.class);
 
 		private final Class<?> validValue;
 		private final String toString;
@@ -55,11 +61,12 @@ public class GroupOption {
 				if (value == null)
 					value = valueRaw;
 			}
-			
-			Validate.isTrue(value.getClass().isAssignableFrom(validValue), this + " has to be " + validValue.getSimpleName() + "!");
 
-			return new GroupOption(this, value);
+			checkValid(value);
+			
+			return new GroupOption(this, validValue == ChatMessage.class && valueRaw.getClass() != ChatMessage.class ? new ChatMessage(String.valueOf(value)) : value);
 		}
+
 
 		public static Option parseOption(String name) {			
 			for (Option type : values())
@@ -67,6 +74,13 @@ public class GroupOption {
 					return type;
 
 			throw new RuntimeException("Unknown group setting: '" + name + "', use one of these: " + StringUtils.join(values(), ", "));
+		}
+
+		protected void checkValid(Object value) {
+			if (validValue == ChatMessage.class) {
+				// all valid
+			} else
+				Validate.isTrue(value.getClass().isAssignableFrom(validValue), this + " has to be " + validValue.getSimpleName() + "! (got " + value + ")");
 		}
 
 		private String makeString() {

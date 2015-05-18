@@ -105,6 +105,7 @@ public class ChatControl extends JavaPlugin {
 			if (Settings.Updater.ENABLED)
 				getServer().getScheduler().runTaskAsynchronously(this, new UpdateCheck());
 
+			Common.LogInFrame(false, "&fBe advised, group system is currently in beta!");
 			Common.addLoggingPrefix();
 
 			if (Settings.DEBUG)

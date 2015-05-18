@@ -296,6 +296,13 @@ Groups:
     guest:
       Message_Delay: 4
       Command_Delay: 6
+      
+    vip:
+      # Notice if you are an OP you need to negate those permissions
+      # otherwise it will be applied on you, too!
+      Join_Message: "&6[VIP] &e%player has joined the game"
+      Leave_Message: "&6[VIP] &e%player has left the game"
+      Kick_Message: none
 
 Updater:
   Enabled: true
