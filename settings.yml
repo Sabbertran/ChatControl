@@ -280,13 +280,22 @@ Sound_Notify:
 # There are currently only two settings.
 Groups:
   Enabled: false
-  # Example usage. Give the player chatcontrol.group.trusted to make it working. 
-  # As you can see, if you do not specify the value, the default will be used.
-  trusted:
-    Message_Delay: 0
-  guest:
-    Message_Delay: 4
-    Command_Delay: 6
+  
+  # If you add a player/group permission (e.g via PermissionsEx: /pex user <nick> add <perm>)
+  # Then you will not need to reload ChatControl with /chc reload
+  # Always checking has impact on performance and it is recommended to have it disabled.
+  Always_Check_Updates: false
+  
+  Group_List:
+   
+    # Example usage. Give the player chatcontrol.group.trusted to make it working. 
+    # As you can see, if you do not specify the value, the default will be used.
+    trusted:
+      Message_Delay: 0
+    
+    guest:
+      Message_Delay: 4
+      Command_Delay: 6
 
 Updater:
   Enabled: true
@@ -325,6 +334,10 @@ Log_Lag_Over_Milis: 100
 # with "dont verbose" operators. This currently works only on packet rules.
 Verbose_Rules: true
 
+# Removes certain messages from startup (reduces spam in the console)
+# If you are having any issues, disable this and enable Verbose and Debug.
+Silent_Startup: true
+
 # Enable if you are having issues, will tell you detailed info in the console.
 Debug: false
-Version: 1
+Version: 2

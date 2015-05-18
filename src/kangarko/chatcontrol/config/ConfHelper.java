@@ -19,7 +19,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.PlayerCache;
 import kangarko.chatcontrol.group.Group;
-import kangarko.chatcontrol.group.GroupSetting;
+import kangarko.chatcontrol.group.GroupOption;
 import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.Writer;
 
@@ -121,8 +121,9 @@ public abstract class ConfHelper {
 
 	// --------------- Getters ---------------
 
-	private static Object getObject(String path, String def) {
-		path = addPathPrefix(path);
+	private static Object getObject(String path, String def, boolean addPathPrefix) {
+		if (addPathPrefix)
+			path = addPathPrefix(path);
 		addDefault(path, def);
 
 		return cfg.get(path);
@@ -184,7 +185,8 @@ public abstract class ConfHelper {
 	}
 
 	protected static HashMap<String, Object> getValuesAndKeys(String path, HashMap<String, Object> def, boolean deep) {
-		path = addPathPrefix(path);
+		if (!path.startsWith(pathPrefix))
+			path = addPathPrefix(path);
 
 		// add default
 		if (!cfg.isSet(path) && def != null) {
@@ -200,7 +202,7 @@ public abstract class ConfHelper {
 		for (String key : cfg.getConfigurationSection(path).getKeys(deep)) {
 			if (keys.containsKey(key))
 				Common.Warn("Duplicate key: " + key + " in " + path);
-			keys.put(key, getObject(path + "." + key, ""));
+			keys.put(key, getObject(path + "." + key, "", false));
 		}
 
 		return keys;
@@ -223,38 +225,49 @@ public abstract class ConfHelper {
 		return new ChatMessage(getString(path, def.getMessage()));
 	}
 
-	protected static List<Group> getGroups(String path, List<Group> defaults) {
+	protected static List<Group> getGroups(String path, List<Group> defaults) {		
 		path = addPathPrefix(path);
 
 		// add default
-		if (!cfg.isConfigurationSection(path))
+		if (!cfg.isConfigurationSection(path)) {
 			for (Group group : defaults) {
 				String groupPath = path + "." + group.getName();
 
 				if (!cfg.isSet(groupPath))
-					for (GroupSetting setting : group.getSettings())
-						addDefault(groupPath + "." + setting.getType(), setting.getValue());
+					for (GroupOption setting : group.getSettings())
+						addDefault(groupPath + "." + setting.getOption(), setting.getValue());
 			}
+
+			try {
+				save();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
 
 		// group name, settings
 		List<Group> groups = new ArrayList<>();
 
 		for (String groupName : cfg.getConfigurationSection(path).getKeys(false)) {
-			if (groupName.equals("Enabled"))
-				continue;
-			
 			// type, value (UNPARSED)
 			HashMap<String, Object> settingsRaw = getValuesAndKeys(path + "." + groupName, null, false);
 
-			List<GroupSetting> settings = new ArrayList<>();
+			List<GroupOption> settings = new ArrayList<>();
 
 			for (Map.Entry<String, Object> entry : settingsRaw.entrySet())
-				settings.add(new GroupSetting(GroupSetting.Type.parseType(entry.getKey()), entry.getValue()));
+				settings.add(GroupOption.Option.parseOption(entry.getKey()).create(entry.getValue()));
 
 			groups.add(new Group(groupName, settings));
 		}
 
 		return groups;
+	}
+
+	protected static void set(String path, Object value) {
+		path = addPathPrefix(path);
+
+		validate(path, value);
+		cfg.set(path, value);
 	}
 
 	private static <T> void validate(String path, T def) {
@@ -387,10 +400,10 @@ public abstract class ConfHelper {
 
 	public static class GroupSpecificHelper<T> {
 
-		private final GroupSetting.Type type;
+		private final GroupOption.Option type;
 		private final T def;
 
-		protected GroupSpecificHelper(GroupSetting.Type type, T def) {
+		protected GroupSpecificHelper(GroupOption.Option type, T def) {
 			this.type = type;
 			this.def = def;
 		}
@@ -399,9 +412,9 @@ public abstract class ConfHelper {
 		public T getFor(PlayerCache cache) {			
 			if (!Settings.Groups.ENABLED)
 				return def;
-				
+
 			for (Group group : cache.groups) {
-				GroupSetting setting = group.getSetting(type);
+				GroupOption setting = group.getSetting(type);
 
 				if (setting != null)
 					return (T) setting.getValue();

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -34,7 +33,6 @@ public class UpdateCheck implements Runnable {
 		this.filesFolderUrl = "https://raw.githubusercontent.com/kangarko/ChatControl/master/precompiled/";
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void run() {
 		String oldversion = ChatControl.instance().getDescription().getVersion();
@@ -43,13 +41,8 @@ public class UpdateCheck implements Runnable {
 			return;
 
 		try {
-			YamlConfiguration conf;
 			InputStream is = new URL(versionInfoUrl).openConnection().getInputStream();
-			try {
-				conf = YamlConfiguration.loadConfiguration(new InputStreamReader(is));
-			} catch (NoSuchMethodError ex) {
-				conf = YamlConfiguration.loadConfiguration(is);
-			}
+			YamlConfiguration conf = CompatProvider.loadConfiguration(is);
 			
 			String newversion = conf.getString("version");
 

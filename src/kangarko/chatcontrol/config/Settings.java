@@ -6,10 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import org.bukkit.scheduler.BukkitRunnable;
+
+import kangarko.chatcontrol.ChatControl;
 import kangarko.chatcontrol.config.ConfHelper.ChatMessage.Type;
 import kangarko.chatcontrol.group.Group;
-import kangarko.chatcontrol.group.GroupManager;
-import kangarko.chatcontrol.group.GroupSetting;
+import kangarko.chatcontrol.group.GroupOption;
+import kangarko.chatcontrol.group.GroupOption.Option;
 import kangarko.chatcontrol.utils.Common;
 
 @SuppressWarnings("unused")
@@ -73,7 +76,7 @@ public class Settings extends ConfHelper {
 			private static void init() {
 				pathPrefix("Anti_Spam.Chat");
 
-				DELAY = new GroupSpecificHelper<Integer>(GroupSetting.Type.MESSAGE_DELAY, getInteger("Delay_Between_Messages", 1));
+				DELAY = new GroupSpecificHelper<Integer>(GroupOption.Option.MESSAGE_DELAY, getInteger("Delay_Between_Messages", 1));
 				SIMILARITY = getInteger("Similar_Percentage_Block", 80);
 			}
 		}
@@ -88,7 +91,7 @@ public class Settings extends ConfHelper {
 			private static void init() {
 				pathPrefix("Anti_Spam.Commands");
 
-				DELAY = new GroupSpecificHelper<Integer>(GroupSetting.Type.COMMAND_DELAY, getInteger("Delay_Between_Commands", 2));
+				DELAY = new GroupSpecificHelper<Integer>(GroupOption.Option.COMMAND_DELAY, getInteger("Delay_Between_Commands", 2));
 				SIMILARITY = getInteger("Similar_Percentage_Block", 80);
 				WHITELIST_DELAY = new HashSet<>(getStringList("Whitelist_Delay", Arrays.asList("spawn", "home")));
 				WHITELIST_SIMILARITY = new HashSet<>(getStringList("Whitelist_Similarity", Arrays.asList("tell", "pm", "t", "w", "r")));
@@ -334,22 +337,38 @@ public class Settings extends ConfHelper {
 
 	public static class Groups {
 		public static List<Group> LOADED_GROUPS;
-		public static boolean ENABLED;
-		
+		public static boolean ENABLED, ALWAYS_CHECK_UPDATES;
+
 		private static final void init() {			
+			pathPrefix("Groups");
+
+			ENABLED = getBoolean("Enabled", false);
+			ALWAYS_CHECK_UPDATES = getBoolean("Always_Check_Updates", false);
+
 			//  group name, settings (example: message-delay, 4)
 			List<Group> defaults = Arrays.asList(
 					new Group("trusted", 
-							new GroupSetting(GroupSetting.Type.MESSAGE_DELAY, 0), new GroupSetting(GroupSetting.Type.COMMAND_DELAY, 1)
+							Option.MESSAGE_DELAY.create(0), Option.COMMAND_DELAY.create(1)
 							),
-					new Group("guest", 
-							new GroupSetting(GroupSetting.Type.MESSAGE_DELAY, 4), new GroupSetting(GroupSetting.Type.COMMAND_DELAY, 6)
-							)
+							new Group("guest", 
+									Option.MESSAGE_DELAY.create(4), Option.COMMAND_DELAY.create(6)
+									)
 					);
 
-			LOADED_GROUPS = getGroups("Groups", defaults);
-			
-			ENABLED = getBoolean("Groups.Enabled", false);
+			LOADED_GROUPS = getGroups("Group_List", defaults);
+
+			if (VERSION == 1) {
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						Common.LogInFrame(true, 
+								" &cGroups were moved to Groups.Group_List",
+								" &cPlease edit your config and restart.",
+								" &cThis message will not be shown again."
+								);	
+					}
+				}.runTaskAsynchronously(ChatControl.instance());
+			}
 		}
 	}
 
@@ -388,12 +407,14 @@ public class Settings extends ConfHelper {
 	public static int MIN_PLAYERS_TO_ENABLE;
 	public static String LOCALIZATION_SUFFIX;
 	protected static String LOCALIZATION;
-	public static boolean VERBOSE_RULES;
+	public static boolean VERBOSE_RULES, SILENT_STARTUP;
 	public static int CATCH_LAG;
 	public static boolean DEBUG;
 	public static int VERSION;
 
 	private static void init() {
+		final int latestConfigVersion = 2;
+
 		MIN_PLAYERS_TO_ENABLE = getInteger("Minimum_Players_To_Enable_Checks", 0);
 		OP_HAS_PERMISSIONS = getBoolean("Op_Has_Permissions", true);
 		REGEX_TIMEOUT = getInteger("Regex_Timeout_Milis", 100);
@@ -401,7 +422,11 @@ public class Settings extends ConfHelper {
 		LOCALIZATION = "messages_" + LOCALIZATION_SUFFIX + ".yml";
 		CATCH_LAG = getInteger("Log_Lag_Over_Milis", 100);
 		VERBOSE_RULES = getBoolean("Verbose_Rules", true);
+		SILENT_STARTUP = getBoolean("Silent_Startup", true);
 		DEBUG = getBoolean("Debug", false);
-		VERSION = getInteger("Version", 1);
+		VERSION = getInteger("Version", latestConfigVersion);
+
+		if (VERSION != latestConfigVersion)
+			set("Version", latestConfigVersion);
 	}
 }

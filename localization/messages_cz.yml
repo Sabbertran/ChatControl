@@ -51,7 +51,7 @@ Signs:
   Broke_When_Violated_A_Rule: Cedulku nelze polozit, neco je v neporadku s textem!
 
 Usage:
-  Fake_Command: '%prefix Pouziti: /chatcontrol fake <&bjoin&f/&aleave&f>'
+  Fake_Command: '%prefix Pouziti: /chatcontrol fake <&bjoin&f/&aleave&f/&ekick&f>'
 
 Update_Available: '&2Je dostupna nova verze &3ChatControlu&2.\n&2Soucasna verze:
   &f%current&2; Nova verze: &f%new\n&2Toto hlaseni muzes vypnout v nastaveni.'

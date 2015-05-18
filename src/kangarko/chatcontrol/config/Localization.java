@@ -9,6 +9,7 @@ import java.util.Objects;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import kangarko.chatcontrol.ChatControl;
+import kangarko.chatcontrol.utils.CompatProvider;
 
 @SuppressWarnings("unused")
 public class Localization extends ConfHelper {
@@ -16,7 +17,6 @@ public class Localization extends ConfHelper {
 	private Localization() {
 	}
 	
-	@SuppressWarnings("deprecation")
 	protected static void load() throws Exception {
 		// try if the user has his modified version of localization inside the plugin folder
 		file = new File(ChatControl.instance().getDataFolder(), "localization/" + Settings.LOCALIZATION);
@@ -30,9 +30,7 @@ public class Localization extends ConfHelper {
 			Objects.requireNonNull(is, "Unknown locale: " + Settings.LOCALIZATION_SUFFIX + " (Possible causes: plugin does not have it or was reloaded)");
 			
 			try {
-				cfg = YamlConfiguration.loadConfiguration(new InputStreamReader(is, StandardCharsets.UTF_8));
-			} catch (NoSuchMethodError ex) {
-				cfg = YamlConfiguration.loadConfiguration(is);
+				cfg = CompatProvider.loadConfiguration(is);
 			} catch (NullPointerException ex) {
 				throw new IllegalLocaleException();
 			}
@@ -147,7 +145,7 @@ public class Localization extends ConfHelper {
 		SIGNS_BROKE = getString("Broke_When_Violated_A_Rule", "Your sign broke, there must be something wrong with it!");
 
 		pathPrefix("Usage");
-		USAGE_FAKE_CMD = getString("Fake_Command", "%prefix Usage: /chatcontrol fake <&bjoin&f/&aleave&f>");
+		USAGE_FAKE_CMD = getString("Fake_Command", "%prefix Usage: /chatcontrol fake <&bjoin&f/&aleave&f/&ekick&f>");
 
 		pathPrefix(null);
 		UPDATE_AVAILABLE = getString("Update_Available", "&2A new version of &3ChatControl&2 is available.\\n&2Current version: &f%current&2; New version: &f%new\\n&2You can disable this notification in the config.");

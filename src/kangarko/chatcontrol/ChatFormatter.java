@@ -148,7 +148,7 @@ public class ChatFormatter implements Listener {
 	}
 
 	private String formatHealth(Player pl) {
-		int health = (int) pl.getHealth();
+		int health = CompatProvider.getHealth(pl);
 
 		return (health > 10 ? ChatColor.DARK_GREEN : health > 5 ? ChatColor.GOLD : ChatColor.RED) + "" + health;
 	}

@@ -150,7 +150,7 @@ public class CommandsHandler implements CommandExecutor {
 				else
 					Common.broadcastWithPlayer(Settings.Messages.JOIN.getMessage(), fakePlayer);
 
-			} else if (param.equals("quit") || param.equals("q")) {
+			} else if (param.equals("quit") || param.equals("q") || param.equals("leave") || param.equals("l")) {
 				if (Settings.Messages.QUIT.getType() == ChatMessage.Type.DEFAULT)
 					Common.broadcast(ChatColor.YELLOW + fakePlayer + ChatColor.YELLOW + " left the game.");
 

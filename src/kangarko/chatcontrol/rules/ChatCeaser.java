@@ -189,8 +189,9 @@ public final class ChatCeaser {
 					Common.Debug("Loaded rule:\n" + rule);
 			}
 
-		for (String file : rulesMap.keySet())
-			Common.Verbose("&fLoaded " + rulesMap.get(file).size() + " Rules in " + file);
+		if (!Settings.SILENT_STARTUP)
+			for (String file : rulesMap.keySet())
+				Common.Log("&fLoaded " + rulesMap.get(file).size() + " Rules in " + file);
 	}
 
 	/**

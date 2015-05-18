@@ -127,7 +127,7 @@ public class ChatControl extends JavaPlugin {
 			} else if (t instanceof IllegalLocaleException)
 				Common.Log(" &cChatControl doesn't have the locale: " + Settings.LOCALIZATION_SUFFIX);
 
-			else if (t.getCause() != null && t.getCause() instanceof UnsupportedOperationException) {
+			else if (t instanceof UnsupportedOperationException || (t.getCause() != null && t.getCause() instanceof UnsupportedOperationException)) {
 				if (getServer().getBukkitVersion().startsWith("1.2.5"))
 					Common.Log(" &cSorry but Minecraft 1.2.5 is no longer supported!");
 				else {

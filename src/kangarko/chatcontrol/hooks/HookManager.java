@@ -51,16 +51,16 @@ public class HookManager {
 	}
 
 	public static void loadDependencies() {
-		if (Common.doesPluginExist("AuthMe"))
+		if (Common.doesPluginExist("AuthMe", "Country Variables"))
 			authMe = new AuthMeHook();
 
 		if (Common.doesPluginExist("Essentials"))
 			essentials = new EssentialsHook();
 
-		if (Common.doesPluginExist("Multiverse-Core"))
+		if (Common.doesPluginExist("Multiverse-Core", "World Alias"))
 			multiverse = new MultiverseHook();
 
-		if (Common.doesPluginExist("ProtocolLib"))
+		if (Common.doesPluginExist("ProtocolLib", "Packet Features"))
 			protocolLib = new ProtocolLibHook();
 
 		if (Common.doesPluginExist("RushCore"))
