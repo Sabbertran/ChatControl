@@ -85,7 +85,8 @@ public class Common {
 	}
 
 	public static void broadcast(String message) {
-		Bukkit.broadcastMessage(colorize(message));
+		for (String part : message.split(System.lineSeparator()))
+			Bukkit.broadcastMessage(colorize(part));
 	}
 
 	public static void broadcastWithPlayer(String message, String playerReplacement) {
@@ -289,7 +290,8 @@ public class Common {
 	}
 
 	public static String stripColors(String str) {	
-		return str.replaceAll("(" + ChatColor.COLOR_CHAR + "|&)([0-9a-fk-or])", "");
+		// Own method -> str.replaceAll("(" + ChatColor.COLOR_CHAR + "|&)([0-9a-fk-or])", "");
+		return ChatColor.stripColor(str);
 	}
 
 	public static int[] checkCaps(String message) {
