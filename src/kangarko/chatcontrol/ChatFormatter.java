@@ -76,6 +76,8 @@ public class ChatFormatter implements Listener {
 				.replace("%pl_suffix", formatColor(HookManager.getPlayerSuffix(pl)))
 
 				.replace("%player", pl.getName())
+				.replace("%displayname", pl.getDisplayName())
+				
 				.replace("%world", HookManager.getWorldAlias(pl.getWorld().getName()))
 				.replace("%health", formatHealth(pl) + ChatColor.RESET)
 
@@ -168,7 +170,7 @@ public class ChatFormatter implements Listener {
 					}
 
 				if (Common.hasPerm(receiver, Permissions.Formatter.SPY))
-					Common.tell(receiver, replaceAllVariables(pl, Settings.Chat.Formatter.SPY_FORMAT.replace("%message", msg).replace("%displayname", pl.getDisplayName())));
+					Common.tell(receiver, replaceAllVariables(pl, Settings.Chat.Formatter.SPY_FORMAT.replace("%message", msg)));
 			}
 
 			return recipients;
