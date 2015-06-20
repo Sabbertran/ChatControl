@@ -15,8 +15,17 @@ import kangarko.chatcontrol.config.Settings;
 import kangarko.chatcontrol.group.GroupOption.Option;
 import kangarko.chatcontrol.utils.Common;
 
+/**
+ * A group with settings.
+ * A player can be associated with one or more groups
+ * according to the settings and their permission.
+ */
 public class Group {
 
+	/**
+	 * The name of the group.
+	 * A permission in form "chatcontrol.group.NAME" will be effective on this group.
+	 */
 	private final String name;
 	private final HashMap<Option, GroupOption> settings;
 	

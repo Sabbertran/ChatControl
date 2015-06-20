@@ -20,6 +20,7 @@ import kangarko.chatcontrol.utils.Common;
 import kangarko.chatcontrol.utils.CompatProvider;
 import kangarko.chatcontrol.utils.Permissions;
 
+@SuppressWarnings("deprecation")
 public class CommandsHandler implements CommandExecutor {
 
 	@Override

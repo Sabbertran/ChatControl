@@ -2,8 +2,6 @@ package kangarko.chatcontrol.config;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -20,7 +18,7 @@ public class Localization extends ConfHelper {
 	protected static void load() throws Exception {
 		// try if the user has his modified version of localization inside the plugin folder
 		file = new File(ChatControl.instance().getDataFolder(), "localization/" + Settings.LOCALIZATION);
-
+		
 		if (file.exists())
 			cfg = YamlConfiguration.loadConfiguration(file);
 		else {

@@ -17,6 +17,7 @@ import kangarko.chatcontrol.utils.LagCatcher;
 import kangarko.chatcontrol.utils.Permissions;
 import kangarko.chatcontrol.utils.Writer;
 
+@SuppressWarnings("deprecation")
 public class CommandListener implements Listener {
 
 	@EventHandler(ignoreCancelled = true)
