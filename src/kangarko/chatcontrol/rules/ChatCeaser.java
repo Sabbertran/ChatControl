@@ -165,7 +165,7 @@ public final class ChatCeaser {
 									rule.setHandler(HandlerLoader.loadHandler(line.replaceFirst("handle as ", ""), rule.getId()));
 
 								else
-									throw new NullPointerException("Unknown operator: " + line);
+									throw new NullPointerException("Unknown operator: '" + line + "'" + " in " + path);
 							}
 						}
 
@@ -489,26 +489,20 @@ public final class ChatCeaser {
 	 * Replaces rule ID (if set) and handler name (if set) in the message
 	 * and player and world name.
 	 *
-	 * @param player the player
-	 * @param handler the handler the variables will be taken from
-	 * @param message the message to replace variables in
-	 * @returns message with modified variables
+	 * @deprecated two methods, make one TODO
 	 */
 	private String replaceVariables(Player player, Handler handler, String message) {
-		return message.replace("%ruleID", handler.getRuleID()).replace("%handler", handler.getName()).replace("%player", player.getName()).replace("%world", player.getWorld().getName());
+		return message.replace("%ruleID", handler.getRuleID()).replace("%handler", handler.getName()).replace("%player", player.getName()).replace("%world", player.getWorld().getName().replace("%message", message));
 	}
 
 	/**
 	 * Replaces rule ID (if set) in the message
 	 * and player and world name.
 	 *
-	 * @param player the player
-	 * @param rule the rule the id will be taken from
-	 * @param message the message to replace variables in
-	 * @returns message with modified variables
+	 * @deprecated two methods, make one TODO
 	 */
 	private String replaceVariables(Player player, Rule rule, String message) {		
-		return message.replace("%ruleID", rule.getId() != null ? rule.getId() : "UNSET").replace("%player", player.getName()).replace("%world", player.getWorld().getName());
+		return message.replace("%ruleID", rule.getId() != null ? rule.getId() : "UNSET").replace("%player", player.getName()).replace("%world", player.getWorld().getName().replace("%message", message));
 	}
 
 	/**
