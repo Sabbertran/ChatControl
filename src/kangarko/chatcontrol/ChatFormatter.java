@@ -75,7 +75,7 @@ public class ChatFormatter implements Listener {
 				.replace("%pl_prefix", formatColor(HookManager.getPlayerPrefix(pl)))
 				.replace("%pl_suffix", formatColor(HookManager.getPlayerSuffix(pl)))
 
-				.replace("%player", pl.getName())
+				.replace("%player", pl.getDisplayName())
 				.replace("%displayname", pl.getDisplayName())
 				
 				.replace("%world", HookManager.getWorldAlias(pl.getWorld().getName()))
